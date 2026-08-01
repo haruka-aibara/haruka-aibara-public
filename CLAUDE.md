@@ -105,3 +105,4 @@
 - **受託×心理的安全性**: `Methodology/Scrum/受託開発で心理的安全性はどこまで作れるか.md` あり
 - **AI自律開発×AWSセキュリティ**: `Cloud Providers/Amazon Web Services/04_セキュリティ/生成AIセキュリティ/` 配下にあり
 - **Slack**: `Collaboration/Slack/` 配下に `Slack.md`、`SlackとTeamsの比較.md`、`開発チームでのSlack活用.md`、`Slackワークフローの作り方.md` あり
+- **ADR×AI**: `Documentation/ADR/ADRの要否をAIに判断させるリポジトリ設計.md` あり
