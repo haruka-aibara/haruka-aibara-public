@@ -87,6 +87,26 @@ Lambda 1 本とスケジュール 1 本だけ。Slack への投稿は Incoming W
 - **導入時のベースライン取り込み**を忘れない。初回実行で既存の指摘を「通知済み」として台帳登録すれば、初回爆発はゼロ。既存分は導入時に一度だけ一覧を出して棚卸しし、以降はリマインドに乗せて消化していく
 - resource の ID がリフレッシュをまたいで同一である保証は明文化されていないので、`awsResourceId` ベースで重複エントリを潰す処理を入れておくと堅い
 
+### チャンネルを分岐したくなったら（タグ → チャンネル振り分け）
+
+「このタグが付いたリソースの指摘はこのチームのチャンネルへ」という振り分けは可能だが、Trusted Advisor 自身はタグを返さない（`RecommendationResourceSummary` にタグのフィールドはなく、`metadata` はチェックごとに中身がバラバラ）。通知を出す直前にタグを解決する 1 ホップを足す。
+
+タグ解決は **AWS Config の advanced query** が最短。`awsResourceId` はチェックによって ID だったり名前だったり形式が揺れるが、Config なら 1 本のクエリでサービス横断に同じ形式でタグが返る：
+
+```sql
+SELECT resourceId, resourceName, resourceType, tags
+WHERE resourceId = 'sg-0123456789abcdef0'
+   OR resourceName = 'my-bucket-name'
+```
+
+これを `SelectResourceConfig` API で叩き、返ってきたタグ（例：`team`）→ チャンネル（Webhook URL）の対応表（SSM Parameter か DynamoDB）で振り分ける。セキュリティ運用をしているアカウントなら Config は有効化済みのはずで、追加部品はゼロ。Resource Groups Tagging API でも引けるが、あちらは ARN が必須で `awsResourceId` から ARN を組み立てる処理をサービスごとに書くことになるので、Config が無い場合の次善策。
+
+設計上の必須事項と導入条件：
+
+- **フォールバックチャンネルは必須**。`awsResourceId` が無いチェック（ルート MFA のようなアカウントレベルの指摘）やタグ未付与のリソースは必ず存在するので、解決できないものはデフォルトのセキュリティチャンネルに落とす
+- タグ解決が走るのは新規検出の通知時だけなので、コストは実質ゼロ
+- **この分岐が価値を持つ条件は 2 つ**：同一アカウントに複数の所有チームが同居していること、タグ付けが強制されていること。どちらかが欠けると、ほとんどの通知がフォールバックに落ちる振り分け装置ができるだけ。タグの整備が先、分岐は後。単一チームで見ているうちはチャンネル 1 本のままが正解
+
 ### まず小さく始めるなら
 
 この Lambda を**1 日 1 回・新規検出の通知だけ**で動かすのが最初の 1 歩。差分計算と台帳だけ作れば、理想状態の 8 割（見に行かなくても届く・アラート疲れしない）が手に入る。放置が気になったらリマインドを、検出遅延を詰めたくなったら高頻度化と `RefreshTrustedAdvisorCheck` を足す。
@@ -110,6 +130,8 @@ Lambda 1 本とスケジュール 1 本だけ。Slack への投稿は Incoming W
 - [ListRecommendationResources - AWS Trusted Advisor API](https://docs.aws.amazon.com/trustedadvisor/latest/APIReference/API_ListRecommendationResources.html)
 - [How to exclude resources from AWS Trusted Advisor reports using Trusted Advisor API - AWS re:Post](https://repost.aws/articles/AR2RklKWyrTRGTCaZZu11dPw/how-to-exclude-resources-from-aws-trusted-advisor-reports-using-trusted-advisor-api)
 - [RefreshTrustedAdvisorCheck - AWS Support API Reference](https://docs.aws.amazon.com/awssupport/latest/APIReference/API_RefreshTrustedAdvisorCheck.html)
+- [SelectResourceConfig - AWS Config API Reference](https://docs.aws.amazon.com/config/latest/APIReference/API_SelectResourceConfig.html)
+- [Example Queries - AWS Config](https://docs.aws.amazon.com/config/latest/developerguide/example-query.html)
 - [Monitoring AWS Trusted Advisor check results with Amazon EventBridge - AWS Support](https://docs.aws.amazon.com/awssupport/latest/user/cloudwatch-events-ta.html)
 - [AWS Trusted Advisor events - Amazon EventBridge](https://docs.aws.amazon.com/eventbridge/latest/ref/events-ref-trustedadvisor.html)
 - [Tutorial: Get started with Slack - Amazon Q Developer in chat applications](https://docs.aws.amazon.com/chatbot/latest/adminguide/slack-setup.html)
