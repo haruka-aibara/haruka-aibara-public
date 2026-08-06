@@ -107,3 +107,4 @@
 - **AI自律開発×AWSセキュリティ**: `Cloud Providers/Amazon Web Services/04_セキュリティ/生成AIセキュリティ/` 配下にあり
 - **Slack**: `Collaboration/Slack/` 配下に `Slack.md`、`SlackとTeamsの比較.md`、`開発チームでのSlack活用.md`、`Slackワークフローの作り方.md` あり
 - **ADR×AI**: `Documentation/ADR/ADRの要否をAIに判断させるリポジトリ設計.md` あり
+- **Config非準拠運用**: `Cloud Providers/Amazon Web Services/04_セキュリティ/検知と可視化/Config非準拠を定期リマインドで解消する運用.md` あり
