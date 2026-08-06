@@ -91,19 +91,27 @@ Lambda 1 本とスケジュール 1 本だけ。Slack への投稿は Incoming W
 
 「このタグが付いたリソースの指摘はこのチームのチャンネルへ」という振り分けは可能だが、Trusted Advisor 自身はタグを返さない（`RecommendationResourceSummary` にタグのフィールドはなく、`metadata` はチェックごとに中身がバラバラ）。通知を出す直前にタグを解決する 1 ホップを足す。
 
-タグ解決は **AWS Config の advanced query** が最短。`awsResourceId` はチェックによって ID だったり名前だったり形式が揺れるが、Config なら 1 本のクエリでサービス横断に同じ形式でタグが返る：
+タグ解決は **AWS Config の advanced query**（`SelectResourceConfig`）を使う。ただし「1 本の万能クエリでサービス横断に引ける」ほど甘くはない。ID 空間が両側で揺れているからだ：
+
+- **TA 側の `awsResourceId` は仕様化されていない**。API リファレンスは「AWS resource identifier。一部チェックには無い」としか言っておらず、中身は SG ID（sg-…）、バケット名、アクセスキー ID（AKIA…）とチェックごとにバラバラ
+- **Config 側も一様ではない**。`resourceId` は SG なら sg-xxx、S3 ならバケット名だが、IAM ユーザーは内部 ID（AIDA…）で名前は `resourceName` 側、RDS は DbiResourceId で DB 識別子は `resourceName` 側
+- 型を絞らないクエリは、別リソースタイプの同名リソース（同名の Lambda と IAM ロールなど）を引いて誤ったタグで振り分ける危険がある
+
+なので実装は「チェック → Config リソースタイプ」の小さい対応表を持ち、**型で絞って引く**：
 
 ```sql
-SELECT resourceId, resourceName, resourceType, tags
-WHERE resourceId = 'sg-0123456789abcdef0'
-   OR resourceName = 'my-bucket-name'
+SELECT resourceId, resourceName, tags
+WHERE resourceType = 'AWS::EC2::SecurityGroup'
+  AND (resourceId = 'sg-0123456789abcdef0' OR resourceName = 'sg-0123456789abcdef0')
 ```
 
-これを `SelectResourceConfig` API で叩き、返ってきたタグ（例：`team`）→ チャンネル（Webhook URL）の対応表（SSM Parameter か DynamoDB）で振り分ける。セキュリティ運用をしているアカウントなら Config は有効化済みのはずで、追加部品はゼロ。Resource Groups Tagging API でも引けるが、あちらは ARN が必須で `awsResourceId` から ARN を組み立てる処理をサービスごとに書くことになるので、Config が無い場合の次善策。
+対応表と聞くとチェックごとの作り込みが復活するようだが、セキュリティカテゴリで実際にフラグが立つチェックは限られるので表は小さい。作る前に `ListRecommendationResources` の実データをダンプして `awsResourceId` の中身を目視すること——仕様がない以上、実測が先、実装が後。
+
+Resource Groups Tagging API でも引けるが、あちらは ARN が必須で `awsResourceId` から ARN を組み立てる処理をサービスごとに書くことになるので、Config が無い場合の次善策。
 
 設計上の必須事項と導入条件：
 
-- **フォールバックチャンネルは必須**。`awsResourceId` が無いチェック（ルート MFA のようなアカウントレベルの指摘）やタグ未付与のリソースは必ず存在するので、解決できないものはデフォルトのセキュリティチャンネルに落とす
+- **フォールバックチャンネルは必須**。対応表に載らないクラスは必ず存在する：`awsResourceId` が無いアカウントレベルの指摘（ルート MFA 等）、Config が記録しないもの（アクセスキー単体。Config の IAM 記録対象は user / group / role / policy）、タグ未付与のリソース。そして**振り分け不能なものは、だいたい振り分けるべきでないもの**——漏洩アクセスキーを特定チームのチャンネルに送るのは間違いで、中央のセキュリティチャンネル直行が正解。不能クラスと不要クラスがほぼ一致するので、フォールバック設計は妥協ではなく本来の姿
 - タグ解決が走るのは新規検出の通知時だけなので、コストは実質ゼロ
 - **この分岐が価値を持つ条件は 2 つ**：同一アカウントに複数の所有チームが同居していること、タグ付けが強制されていること。どちらかが欠けると、ほとんどの通知がフォールバックに落ちる振り分け装置ができるだけ。タグの整備が先、分岐は後。単一チームで見ているうちはチャンネル 1 本のままが正解
 
