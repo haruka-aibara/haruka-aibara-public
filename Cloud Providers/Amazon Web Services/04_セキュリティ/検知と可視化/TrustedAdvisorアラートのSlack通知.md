@@ -37,7 +37,7 @@ Trusted Advisor は EventBridge（us-east-1 のみ）に `Trusted Advisor Check 
 | 定期ダイジェスト | 上記以外すべて（コスト、耐障害性など） | **週 1 通に固定** | 棚卸しのインプットになるか？ |
 | 通知しない | 変化のない項目のリフレッシュ再通知、OK 復帰のリソース単位通知 | 0 | 解消はダイジェストの「解消 N 件」で見る |
 
-ポイントは再通知を「事故」ではなく「設計されたリマインド」にすること。同じ項目の通知が来るのは、リフレッシュのたびのランダムな重複ではなく「N 日経っても未解消」という意味を持ったときだけ。リマインドが増えてきたらそれ自体が「対応が回っていない」というシグナルになる。リスク受容した項目は期限付きの抑止リストに入れ、リマインド対象から外す（無期限の抑止は作らない。受容の再評価も期限で強制する）。
+ポイントは再通知を「事故」ではなく「設計されたリマインド」にすること。同じ項目の通知が来るのは、リフレッシュのたびのランダムな重複ではなく「N 日経っても未解消」という意味を持ったときだけ。リマインドが増えてきたらそれ自体が「対応が回っていない」というシグナルになる。リスク受容した項目は Trusted Advisor ネイティブの除外（exclusion）に落としてリマインド対象から外し、自前で持つのは除外の期限管理だけにする（無期限の受容は作らない。期限が来たら include に戻して受容の再評価を強制する）。
 
 ダイジェストは「新規 N 件 / 解消 M 件 / 継続 K 件」の 1 通に集約し、来る曜日を固定する。人間は「毎週月曜朝に来る 1 通」は読むが、「ランダムに来る 30 通」は読まない。
 
@@ -83,11 +83,20 @@ EventBridge Scheduler（日次）
 
 ### 通知台帳（DynamoDB）の設計
 
-キーは「チェック名 + イベントの `detail.uuid`（チェック項目の識別子）」。属性に初回検出日時・初回通知日時・最終リマインド日時・状態（未解消 / 解消 / 受容）を持つ。
+主キーは新 Trusted Advisor API の **recommendation resource ARN** に一本化する。EventBridge イベントは旧 Support API 系の ID 空間（`uuid` / `resource_id` / `check-item-detail`）で ARN を直接は持っていないが、チェック ID を介して辿れる：
+
+1. イベントの `check-name` → `checkArn`（`arn:aws:trustedadvisor:::check/<チェックID>`。新 API の `ListChecks` が名前と ARN を返す。対象チェックは数個なのでキャッシュで足りる）
+2. `ListRecommendations(checkIdentifier=checkArn)` → `recommendationArn`
+3. `ListRecommendationResources(recommendationArn)` → 該当リソースを特定して resource ARN を得る。`awsResourceId` があればそれで照合、無いチェックはイベントの `check-item-detail` と API 側の `metadata`（同じ列スキーマ由来）を識別列で照合する（`Time Updated` のような揮発列は照合に使わない）
+
+ARN に正規化する利点は、即時通知・リマインド・解消判定・除外操作（`BatchUpdateRecommendationResourceExclusion` は ARN を受け取る）が全部同じキーで回ること。台帳の属性には初回検出日時・初回通知日時・最終リマインド日時・状態（未解消 / 解消 / 受容と期限）を持つ。
 
 - **即時レーン**は台帳にない項目だけ通知する。これで at-least-once の重複・リフレッシュごとの再イベント・フラッピングをまとめて吸収できる
+- **解決のフォールバック**：イベント到着直後は新 API 側に同じリフレッシュ結果がまだ反映されていないことがありうる。ARN 解決に失敗したら数分後にリトライし、それでもダメなら「チェック + 抽出した識別子」で仮登録して通知だけ先に出し、定期レーンが次回実行時に ARN へ補正する
 - **リマインド**は定期レーンが台帳を見て「未解消かつ最終通知から N 日経過」を再通知する
 - **導入時のベースライン取り込み**を忘れない。有効化前に定期レーンを 1 回流して既存の指摘を台帳に「通知済み」として登録しておけば、初回爆発はゼロになる。既存分は初回の週次ダイジェストで「継続 K 件」として一覧で見る
+
+なお resource の ID がリフレッシュをまたいで同一である保証は明文化されていないので、定期レーンでは `awsResourceId` ベースで重複エントリを潰す処理を入れておくと堅い。
 
 ### まず小さく始めるなら
 
@@ -112,6 +121,8 @@ EventBridge Scheduler（日次）
 - [AWS Trusted Advisor events - Amazon EventBridge](https://docs.aws.amazon.com/eventbridge/latest/ref/events-ref-trustedadvisor.html)
 - [AWS Trusted Advisor - AWS Support](https://docs.aws.amazon.com/awssupport/latest/user/trusted-advisor.html)
 - [Trusted Advisor API Reference（ListRecommendations 等）](https://docs.aws.amazon.com/trustedadvisor/latest/APIReference/Welcome.html)
+- [ListRecommendationResources - AWS Trusted Advisor API](https://docs.aws.amazon.com/trustedadvisor/latest/APIReference/API_ListRecommendationResources.html)
+- [How to exclude resources from AWS Trusted Advisor reports using Trusted Advisor API - AWS re:Post](https://repost.aws/articles/AR2RklKWyrTRGTCaZZu11dPw/how-to-exclude-resources-from-aws-trusted-advisor-reports-using-trusted-advisor-api)
 - [RefreshTrustedAdvisorCheck - AWS Support API Reference](https://docs.aws.amazon.com/awssupport/latest/APIReference/API_RefreshTrustedAdvisorCheck.html)
 - [Tutorial: Get started with Slack - Amazon Q Developer in chat applications](https://docs.aws.amazon.com/chatbot/latest/adminguide/slack-setup.html)
 - [aws/Trusted-Advisor-Tools（ExposedAccessKeys のイベント例）- GitHub](https://github.com/aws/Trusted-Advisor-Tools/blob/master/ExposedAccessKeys/README.md)
