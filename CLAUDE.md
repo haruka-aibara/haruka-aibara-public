@@ -110,3 +110,4 @@
 - **Slack**: `Collaboration/Slack/` 配下に `Slack.md`、`SlackとTeamsの比較.md`、`開発チームでのSlack活用.md`、`Slackワークフローの作り方.md` あり
 - **ADR×AI**: `Documentation/ADR/ADRの要否をAIに判断させるリポジトリ設計.md` あり
 - **Trusted Advisor通知**: `Cloud Providers/Amazon Web Services/04_セキュリティ/検知と可視化/TrustedAdvisorアラートのSlack通知.md` あり
+- **Syslog**: `Infrastructure Monitoring/Syslog/` 配下に親ページ＋`syslogとは何か.md`、`rsyslogとsyslog-ngの選び方.md`、`ログ集約サーバーの構築.md`
