@@ -7,14 +7,14 @@
 <style>
 :root{
   --bg:#fbfaf8; --card:#fff; --ink:#23201d; --muted:#6b645c; --line:#e3ded6;
-  --lane:#eeeae4; --warn-bg:#fdf3f1; --warn-line:#e0b4ac;
-  --c1:#3d6b9c; --c2:#b8562f; --c3:#5f8248; --c4:#7a63a0; --stop:#c2453a; --on:#fff;
+  --lane:#eeeae4;
+  --c1:#3d6b9c; --c2:#b8562f; --c3:#5f8248; --on:#fff;
 }
 @media (prefers-color-scheme:dark){
   :root{
     --bg:#17161a; --card:#1e1d22; --ink:#e8e4dd; --muted:#9d968c; --line:#34323a;
-    --lane:#2a2830; --warn-bg:#2a1e1d; --warn-line:#6b3b35;
-    --c1:#5c8cc0; --c2:#cf6c42; --c3:#77a05c; --c4:#9680bd; --stop:#d75b4f; --on:#15141a;
+    --lane:#2a2830;
+    --c1:#5c8cc0; --c2:#cf6c42; --c3:#77a05c; --on:#15141a;
   }
 }
 *{box-sizing:border-box}
@@ -27,14 +27,10 @@ main{max-width:52rem;margin:0 auto}
 h1{font-size:1.9rem;line-height:1.35;margin:0 0 .4rem}
 .lede{color:var(--muted);margin:0 0 2.5rem;font-size:1.02rem}
 h2{font-size:1.25rem;margin:3rem 0 .6rem;padding-top:1.4rem;border-top:1px solid var(--line)}
-h3{font-size:1.02rem;margin:1.8rem 0 .4rem}
 p{margin:.7rem 0}
 figure{margin:1.4rem 0;padding:1.1rem 1.1rem .8rem;background:var(--card);border:1px solid var(--line);border-radius:10px}
 figure svg{display:block;width:100%;height:auto}
 figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
-.note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:.9rem 1.1rem;margin:1.4rem 0}
-.note strong{color:var(--stop)}
-.note p{margin:.35rem 0}
 code{background:var(--lane);padding:.1em .4em;border-radius:4px;font-size:.9em}
 pre{background:var(--lane);border:1px solid var(--line);border-radius:8px;padding:.8rem 1rem;overflow-x:auto;font-size:.87rem;line-height:1.65;margin:1rem 0}
 pre code{background:none;padding:0;font-size:1em}
@@ -77,7 +73,7 @@ a{color:var(--c1)}
   <text x="312" y="18" font-size="12" font-weight="600" fill="var(--ink)">AWS 上の実物</text>
 
   <rect x="314" y="44" width="364" height="92" rx="7" fill="var(--lane)"/>
-  <text x="328" y="64" font-size="11" fill="var(--muted)">state に載る＝この Terraform の持ち物</text>
+  <text x="328" y="64" font-size="11" fill="var(--muted)">この Terraform が作って持っているもの</text>
   <rect x="328" y="76" width="106" height="44" rx="5" fill="var(--c1)" opacity=".78"/>
   <text x="381" y="103" font-size="10.5" fill="var(--on)" text-anchor="middle">EC2 インスタンス</text>
   <rect x="444" y="76" width="106" height="44" rx="5" fill="var(--c1)" opacity=".78"/>
@@ -85,7 +81,7 @@ a{color:var(--c1)}
   <text x="497" y="111" font-size="10.5" fill="var(--on)" text-anchor="middle">グループ</text>
 
   <rect x="314" y="156" width="364" height="104" rx="7" fill="var(--lane)"/>
-  <text x="328" y="176" font-size="11" fill="var(--muted)">state に載らない＝管理外</text>
+  <text x="328" y="176" font-size="11" fill="var(--muted)">管理外（でも参照したい）</text>
   <rect x="328" y="188" width="106" height="56" rx="5" fill="none" stroke="var(--c3)" stroke-width="1.4" stroke-dasharray="4 3"/>
   <text x="381" y="211" font-size="10.5" fill="var(--ink)" text-anchor="middle">手動で作った</text>
   <text x="381" y="227" font-size="10.5" fill="var(--ink)" text-anchor="middle">VPC</text>
@@ -101,10 +97,55 @@ a{color:var(--c1)}
   <line x1="308" y1="211" x2="196" y2="211" stroke="var(--c3)" stroke-width="1.8" marker-end="url(#ah-c3)"/>
   <text x="252" y="204" font-size="10.5" fill="var(--c3)" text-anchor="middle">読む（何も変えない）</text>
 </svg>
-<figcaption><code>data</code> の読み取り結果は state に記録されるが、それは所有権を意味しない。<code>terraform destroy</code> しても <code>data</code> で参照した VPC は消えない。</figcaption>
+<figcaption><code>data</code> は読み取り専用なので、<code>terraform destroy</code> しても参照先の VPC や Route53 は消えない。逆に言えば、<code>data</code> で書いておけば「うっかり壊す」経路そのものが存在しない。</figcaption>
 </figure>
 
 <h2>書き方</h2>
+<p>デフォルト VPC を読み取る例。<code>default = true</code> は「どれを探すか」の条件。</p>
+<pre><code>data "aws_vpc" "default" {
+  default = true
+}</code></pre>
+<p>読み取った値は <code>data.</code> から始まる名前で参照する。</p>
+
+<figure>
+<svg viewBox="0 0 700 244" role="img" aria-label="dataブロックの宣言と参照の書き方の対応">
+  <text x="20" y="16" font-size="11.5" font-weight="600" fill="var(--muted)">宣言する</text>
+  <rect x="20" y="26" width="660" height="76" rx="7" fill="var(--lane)"/>
+
+  <rect x="70" y="36" width="78" height="22" rx="3" fill="var(--c1)" opacity=".22"/>
+  <rect x="156" y="36" width="78" height="22" rx="3" fill="var(--c2)" opacity=".22"/>
+  <text x="30" y="53" font-size="14" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" fill="var(--ink)">data "aws_vpc" "default" {</text>
+  <text x="30" y="73" font-size="14" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" fill="var(--muted)">  default = true</text>
+  <text x="30" y="93" font-size="14" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" fill="var(--ink)">}</text>
+
+  <text x="20" y="136" font-size="11.5" font-weight="600" fill="var(--muted)">参照する</text>
+  <rect x="20" y="146" width="660" height="44" rx="7" fill="var(--lane)"/>
+  <rect x="76" y="156" width="70" height="26" rx="3" fill="var(--c1)" opacity=".22"/>
+  <rect x="153" y="156" width="70" height="26" rx="3" fill="var(--c2)" opacity=".22"/>
+  <rect x="230" y="156" width="22" height="26" rx="3" fill="var(--c3)" opacity=".22"/>
+  <text x="30" y="175" font-size="16" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" fill="var(--ink)">data.aws_vpc.default.id</text>
+  <text x="290" y="175" font-size="11" fill="var(--muted)">← 先頭の data. を忘れやすい</text>
+
+  <g font-size="11" fill="var(--muted)">
+    <rect x="20" y="212" width="11" height="11" rx="2" fill="var(--c1)"/>
+    <text x="37" y="222">タイプ（プロバイダが決めている）</text>
+    <rect x="250" y="212" width="11" height="11" rx="2" fill="var(--c2)"/>
+    <text x="267" y="222">名前（自分で付ける）</text>
+    <rect x="420" y="212" width="11" height="11" rx="2" fill="var(--c3)"/>
+    <text x="437" y="222">読み取りたい属性</text>
+  </g>
+</svg>
+<figcaption><code>resource</code> の参照は <code>aws_vpc.main.id</code> と3つに区切るが、<code>data</code> は先頭に <code>data.</code> が付いて4つになる。この差が最初のつまずきどころ。</figcaption>
+</figure>
+
+<p>あとは <code>resource</code> の中でふつうに使える。</p>
+<pre><code>resource "aws_subnet" "app" {
+  vpc_id     = data.aws_vpc.default.id
+  cidr_block = "172.31.100.0/24"
+}</code></pre>
+
+<h2>よくある例：最新の AMI を拾う</h2>
+<p>AMI ID を <code>ami-0123456789abcdef0</code> のように直接書くと、セキュリティ更新が出ても古いままになる。<code>data</code> で条件を書いておけば、apply のたびに最新のものが選ばれる。</p>
 <pre><code>data "aws_ami" "amazon_linux" {
   most_recent = true
   owners      = ["amazon"]
@@ -116,116 +157,20 @@ a{color:var(--c1)}
 }
 
 resource "aws_instance" "web" {
-  ami           = data.aws_ami.amazon_linux.id   # ハードコードしなくて済む
+  ami           = data.aws_ami.amazon_linux.id
   instance_type = "t3.micro"
 }</code></pre>
-<p>参照は <code>data.タイプ.名前.属性</code>。<code>resource</code> の参照（<code>タイプ.名前.属性</code>）に <code>data.</code> が前置される形。</p>
 
-<h3>タグで引く</h3>
-<pre><code>data "aws_subnets" "shared_private" {
-  filter {
-    name   = "tag:Name"
-    values = ["shared-private-*"]
-  }
-}</code></pre>
-<p>他チームのリソースを参照するときは ID をハードコードせず、タグで引く。ID 直書きだと相手がリソースを作り直した瞬間に黙って壊れる。</p>
-
-<h3>アカウント・リージョンを埋め込む</h3>
-<pre><code>data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
-
-resource "aws_s3_bucket" "logs" {
-  bucket = "logs-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.region}"
-}</code></pre>
-<p>同じコードを dev / prod の別アカウントに適用しても、バケット名が自動で分かれる。</p>
-
-<div class="note">
-<p><strong>AWS プロバイダ v6 での変更</strong></p>
-<p><code>data.aws_region.current.name</code> は v6.0 で非推奨になり、<code>.region</code> に置き換わった。プロバイダを上げたときに大量の deprecation warning が出るのはこれ。</p>
-</div>
-
-<h2>いつ読まれるのか</h2>
-<p>「plan に <code>(known after apply)</code> が並んで、何が変わるのか読めない」——これの原因はたいてい <code>data</code> の読み取りタイミングにある。</p>
-<p>Terraform は <code>data</code> をできるだけ plan 時に読もうとする。ただし引数に「plan の時点で確定していない値」が混じると、読み取りが apply まで先送りされる。</p>
-
-<figure>
-<svg viewBox="0 0 700 236" role="img" aria-label="データソースがplan時に読まれる場合とapply時に先送りされる場合の比較">
-  <line x1="170" y1="24" x2="170" y2="190" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3" opacity=".5"/>
-  <line x1="470" y1="24" x2="470" y2="190" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3" opacity=".5"/>
-  <text x="170" y="16" font-size="11.5" font-weight="600" fill="var(--muted)" text-anchor="middle">terraform plan</text>
-  <text x="470" y="16" font-size="11.5" font-weight="600" fill="var(--muted)" text-anchor="middle">terraform apply</text>
-
-  <text x="20" y="46" font-size="12.5" font-weight="600" fill="var(--ink)">A. 引数がすべて確定している</text>
-  <rect x="20" y="56" width="660" height="42" rx="7" fill="var(--lane)"/>
-  <rect x="136" y="66" width="68" height="24" rx="4" fill="var(--c3)"/>
-  <text x="170" y="83" font-size="10.5" fill="var(--on)" text-anchor="middle">読み取り</text>
-  <text x="216" y="83" font-size="11" fill="var(--ink)">plan に実際の値が出る → 差分をレビューできる</text>
-
-  <text x="20" y="132" font-size="12.5" font-weight="600" fill="var(--ink)">B. 引数が未作成リソースを参照 ／ depends_on あり</text>
-  <rect x="20" y="142" width="660" height="42" rx="7" fill="var(--lane)"/>
-  <rect x="128" y="152" width="84" height="24" rx="4" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="4 3"/>
-  <text x="170" y="169" font-size="10.5" fill="var(--muted)" text-anchor="middle">読めない</text>
-  <rect x="436" y="152" width="68" height="24" rx="4" fill="var(--c2)"/>
-  <text x="470" y="169" font-size="10.5" fill="var(--on)" text-anchor="middle">読み取り</text>
-  <text x="224" y="169" font-size="11" fill="var(--stop)">(known after apply)</text>
-  <text x="516" y="169" font-size="11" fill="var(--ink)">ここで初めて確定</text>
-
-  <text x="20" y="212" font-size="11" fill="var(--muted)">B では未確定が依存先の resource にも波及し、「何が変わるか分からない plan」を承認する形になる。</text>
-</svg>
-<figcaption><code>depends_on</code> を <code>data</code> に付けると、引数が確定していても無条件に B になる。まず属性参照による暗黙の依存で解けないかを疑い、<code>depends_on</code> は参照で表現できないとき（IAM ポリシーの伝播待ちなど）だけに絞る。</figcaption>
-</figure>
-
-<h2>ハマりどころ</h2>
+<h2>最初に知っておくこと</h2>
 <ul>
-<li><strong>見つからないとエラーで止まる</strong>：マッチしないと <code>no matching X found</code> で plan ごと失敗する。<code>null</code> は返らないし <code>try()</code> でも握りつぶせない——エラーは式の評価ではなく読み取りの時点で起きるため。存在が不確実なら <code>count</code> で読み取り自体をスキップする。</li>
-<li><strong>複数マッチしてもエラー</strong>：<code>aws_ami</code> や <code>aws_subnet</code> のような単数形は「ちょうど1件」を要求する。フィルタが緩いと、リソースが増えた日に突然壊れる。複数前提なら <code>aws_subnets</code> のような複数形を使う。</li>
-<li><strong>読み取り結果は state に平文で残る</strong>：<code>sensitive</code> は CLI 出力のマスクであって、state の中身は隠れない。<code>data "aws_secretsmanager_secret_version"</code> でパスワードを読めば、state バケットを読める人全員がそれを読める。秘密は <code>data</code> ではなく <code>ephemeral</code>（Terraform 1.10+）で扱う。→ <a href="../22_セキュリティ/22-05_シークレット管理.md">22-05 シークレット管理</a></li>
+<li><strong>条件に合うものが見つからないとエラーで止まる</strong>：空っぽの値が返るのではなく、<code>no matching ... found</code> で plan ごと失敗する。フィルタの書き間違いはここで気づく。</li>
+<li><strong>条件に複数マッチしてもエラー</strong>：<code>aws_vpc</code> や <code>aws_ami</code> は「ちょうど1件」を要求する。1件に絞れる条件を書く。</li>
 </ul>
-
-<h3>most_recent = true は「変更のトリガー」でもある</h3>
-<p>最新 AMI を自動で拾う書き方は便利だが、<strong>管理外の出来事が自分の plan を動かす</strong>ということでもある。</p>
-
-<figure>
-<svg viewBox="0 0 700 208" role="img" aria-label="AMIの更新が意図しないインスタンス再作成を引き起こす時間軸">
-  <defs>
-    <marker id="ah-t" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/>
-    </marker>
-  </defs>
-
-  <rect x="36" y="20" width="150" height="34" rx="5" fill="var(--c3)"/>
-  <text x="111" y="42" font-size="10.5" fill="var(--on)" text-anchor="middle">初回 apply</text>
-  <rect x="258" y="20" width="204" height="34" rx="5" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="4 3"/>
-  <text x="360" y="35" font-size="10.5" fill="var(--muted)" text-anchor="middle">Amazon が新しい AMI を公開</text>
-  <text x="360" y="49" font-size="10.5" fill="var(--muted)" text-anchor="middle">（自分は何も変えていない）</text>
-  <rect x="524" y="20" width="150" height="34" rx="5" fill="var(--c2)"/>
-  <text x="599" y="42" font-size="10.5" fill="var(--on)" text-anchor="middle">次の plan</text>
-
-  <line x1="20" y1="76" x2="690" y2="76" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ah-t)"/>
-  <circle cx="111" cy="76" r="4" fill="var(--c3)"/>
-  <circle cx="360" cy="76" r="4" fill="var(--muted)"/>
-  <circle cx="599" cy="76" r="4" fill="var(--c2)"/>
-  <text x="690" y="66" font-size="10.5" fill="var(--muted)" text-anchor="end">時間</text>
-
-  <rect x="36" y="96" width="150" height="30" rx="5" fill="var(--lane)"/>
-  <text x="111" y="116" font-size="10.5" fill="var(--ink)" text-anchor="middle">ami = ami-aaa</text>
-  <rect x="524" y="96" width="150" height="30" rx="5" fill="var(--lane)"/>
-  <text x="599" y="116" font-size="10.5" fill="var(--ink)" text-anchor="middle">ami = ami-bbb</text>
-
-  <rect x="470" y="140" width="204" height="46" rx="6" fill="var(--warn-bg)" stroke="var(--warn-line)" stroke-width="1.3"/>
-  <text x="572" y="160" font-size="10.5" fill="var(--stop)" text-anchor="middle"># forces replacement</text>
-  <text x="572" y="176" font-size="10.5" fill="var(--stop)" text-anchor="middle">aws_instance が破棄 → 再作成</text>
-  <line x1="599" y1="128" x2="599" y2="138" stroke="var(--warn-line)" stroke-width="1.3"/>
-</svg>
-<figcaption>無関係な変更のつもりで <code>apply</code> したら本番インスタンスが入れ替わる、という事故がこれ。AMI をバージョン固定して更新を意図的な PR にするか、Auto Scaling + Launch Template のように入れ替えが安全な構成にしておく。</figcaption>
-</figure>
 
 <h2>参考</h2>
 <ul>
 <li><a href="https://developer.hashicorp.com/terraform/language/data-sources">Terraform - Query data from external sources（Data Sources）</a></li>
-<li><a href="https://developer.hashicorp.com/terraform/language/meta-arguments/depends_on">Terraform - depends_on meta-argument</a></li>
-<li><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/enhanced-region-support">Terraform AWS Provider - Enhanced Region Support</a></li>
-<li><a href="https://sanderknape.com/2024/11/terraform-data-source-read-during-apply-messages-fix/">Sander Knape - Terraform 'data source will be read during apply' messages</a></li>
+<li><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc">Terraform AWS Provider - aws_vpc（データソース）</a></li>
 </ul>
 
 </main>
