@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTTP/2 の解説</title>
+<style>
+body{max-width:44rem;margin:2rem auto;padding:0 1rem;line-height:1.8;font-family:system-ui,sans-serif}
+h1,h2{border-bottom:1px solid #ccc;padding-bottom:.3rem}
+code{background:#f2f2f2;padding:.1em .3em;border-radius:3px}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #ccc;padding:.4rem .6rem;text-align:left}
+th{background:#f7f7f7}
+</style>
+</head>
+<body>
+
+<h1>HTTP/2</h1>
+
+<h2>どういうときに困るのか</h2>
+<p>ページの表示が遅い。調べると1リクエストあたりの応答は速いのに、画像・CSS・JS が数十個あって全体が遅い。HTTP/1.1 では1つの TCP コネクションで同時に1リクエストしか処理できず、前のレスポンスが返るまで次が待たされる（<strong>Head-of-Line ブロッキング</strong>）。ブラウザは仕方なくドメインあたり6本程度のコネクションを張るが、それでも足りない。</p>
+<p>回避策として、画像を1枚に結合する CSS スプライト、JS/CSS のバンドル、静的ファイルを別ドメインに逃がすドメインシャーディングが使われてきた。これらは「HTTP/1.1 の制約を迂回するためのハック」であって、本来必要ない作業。</p>
+<p>その制約を、プロトコル側で解決したのが HTTP/2。</p>
+
+<h2>何が変わったのか</h2>
+
+<h3>1. バイナリフレーム</h3>
+<p>HTTP/1.1 のテキスト形式をやめ、<strong>フレーム</strong>という固定構造の単位に分割して送る。ヘッダは HEADERS フレーム、ボディは DATA フレーム。パースが機械的になり、多重化の土台になる。</p>
+
+<h3>2. ストリームの多重化（本命）</h3>
+<p>1本の TCP コネクション上に、<strong>ストリーム</strong>という論理的な通信路を複数並べる。各フレームはストリーム ID を持つので、複数のリクエスト／レスポンスを同時並行でやり取りできる。順番待ちが消える。</p>
+<p>結果として、スプライト画像もドメインシャーディングも不要になる。むしろシャーディングはコネクションを分散させて HTTP/2 の利点を潰すので逆効果。</p>
+
+<h3>3. ヘッダ圧縮（HPACK）</h3>
+<p><code>Cookie</code> や <code>User-Agent</code> は毎リクエストほぼ同じ内容が繰り返される。HPACK は静的テーブル＋動的テーブルで既出のヘッダをインデックス参照に置き換え、リクエストあたり数百バイトの重複を削る。リクエスト数が多いページほど効く。</p>
+
+<h3>4. ストリーム優先度</h3>
+<p>「CSS を画像より先に」といった重み付けをクライアントが指定できる。ただし実装差が大きく、RFC 9113 では優先度スキームは非推奨扱いになった。</p>
+
+<h3>5. サーバプッシュ</h3>
+<p>HTML を返すついでに CSS も送りつける機能。キャッシュ済みのものを送って無駄になるケースが多く、Chrome は 2022 年にデフォルト無効化。実質的に死んだ機能で、<code>103 Early Hints</code> が代替。</p>
+
+<h2>HTTP/1.1 との比較</h2>
+<table>
+<tr><th></th><th>HTTP/1.1</th><th>HTTP/2</th></tr>
+<tr><td>形式</td><td>テキスト</td><td>バイナリフレーム</td></tr>
+<tr><td>同時リクエスト</td><td>1コネクション1本</td><td>1コネクションで多重化</td></tr>
+<tr><td>ヘッダ</td><td>毎回フルテキスト</td><td>HPACK で圧縮</td></tr>
+<tr><td>推奨されたハック</td><td>スプライト・シャーディング</td><td>不要（むしろ有害）</td></tr>
+</table>
+
+<h2>運用上のポイント</h2>
+<ul>
+<li><strong>実質 TLS 必須</strong>：仕様上は平文（h2c）も可能だが、主要ブラウザは TLS 上でしかサポートしない。ネゴシエーションは TLS 拡張の <strong>ALPN</strong> で行う。</li>
+<li><strong>TCP レベルの HoL は残る</strong>：HTTP のブロッキングは解消したが、TCP パケットが1つ落ちると全ストリームが待たされる。ここを潰したのが QUIC（UDP ベース）上に載る HTTP/3。</li>
+<li><strong>HTTP/1.1 向け最適化を消す</strong>：シャーディングやインライン化は残っていると足を引っ張る。</li>
+<li><strong>導入は端点だけで済むことが多い</strong>：ALB / CloudFront / nginx などのフロント側で HTTP/2 を有効にすれば、バックエンドは HTTP/1.1 のままでよい。</li>
+</ul>
+
+<h2>セキュリティ視点</h2>
+<p>多重化は「1コネクションで大量のリクエストを投げられる」ことでもあり、DoS の増幅要因になる。実例：</p>
+<ul>
+<li><strong>HTTP/2 Rapid Reset（CVE-2023-44487）</strong>：リクエスト直後に <code>RST_STREAM</code> でキャンセルする動作を繰り返し、同時ストリーム上限を回避してサーバを飽和させる。2023 年に観測史上最大級の DDoS に使われた。対策はサーバ／ミドルウェアのパッチ適用とストリームリセットのレート制限。</li>
+<li><strong>リクエストスマグリング</strong>：フロントが HTTP/2、バックエンドが HTTP/1.1 という構成では、ダウングレード変換時のヘッダ解釈差が悪用されうる（H2.CL / H2.TE）。</li>
+</ul>
+<p>提案するときの言い方：「HTTP/2 は表示速度の改善策だが、同時に1コネクションあたりの負荷特性が変わる。WAF やレート制限の閾値がリクエスト数前提なら、見直しが要る」。</p>
+
+<h2>参考</h2>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9113.html">RFC 9113 - HTTP/2</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7541.html">RFC 7541 - HPACK: Header Compression for HTTP/2</a></li>
+<li><a href="https://developer.mozilla.org/ja/docs/Web/HTTP/Guides/Evolution_of_HTTP">MDN - HTTP の進化</a></li>
+<li><a href="https://blog.cloudflare.com/technical-breakdown-http2-rapid-reset-ddos-attack/">Cloudflare - HTTP/2 Rapid Reset の技術解説</a></li>
+<li><a href="https://developer.chrome.com/blog/removing-push">Chrome - Removing HTTP/2 Server Push</a></li>
+<li><a href="https://portswigger.net/research/http2">PortSwigger - HTTP/2: The Sequel is Always Worse</a></li>
+</ul>
+
+</body>
+</html>
