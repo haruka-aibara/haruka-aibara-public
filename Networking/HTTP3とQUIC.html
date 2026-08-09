@@ -6,94 +6,100 @@
 <title>HTTP/3 と QUIC</title>
 <style>
 :root{color-scheme:light dark}
-body{max-width:44rem;margin:2rem auto;padding:0 1rem;line-height:1.8;font-family:system-ui,sans-serif}
-h1,h2{line-height:1.4}
-h2{margin-top:2.5rem;border-bottom:1px solid #8888;padding-bottom:.3rem}
+body{max-width:42rem;margin:2rem auto;padding:0 1rem;line-height:1.8;font-family:system-ui,sans-serif}
+h2{margin-top:2.5rem}
 table{border-collapse:collapse;width:100%;margin:1rem 0}
-th,td{border:1px solid #8888;padding:.5rem;text-align:left}
-code{background:#8882;padding:.1rem .3rem;border-radius:3px}
-pre{background:#8882;padding:.8rem;overflow-x:auto;border-radius:4px}
-blockquote{border-left:3px solid #8888;margin:1rem 0;padding-left:1rem;color:#888}
+th,td{border:1px solid #8888;padding:.5rem;text-align:left;vertical-align:top}
+code{background:#8882;padding:.1rem .3rem}
+pre{background:#8882;padding:.8rem;overflow-x:auto}
 </style>
 </head>
 <body>
 
 <h1>HTTP/3 と QUIC</h1>
 
-<h2>どういうときに困るのか</h2>
+<h2>この判断を迫られるとき</h2>
 
-<p>モバイル回線でサイトを開くと、Wi-Fi では速いのに 4G だと妙に重い。パケットロスが数％あるだけで、画像も CSS も JS も同時に止まる。HTTP/2 は 1 本の TCP コネクションに複数ストリームを多重化するので、<strong>TCP レイヤで 1 パケット落ちると、後続の全ストリームが再送待ちで止まる</strong>（TCP Head-of-Line ブロッキング）。アプリ層で多重化しても、下の TCP が順序保証をする限り逃げられない。</p>
+<p>HTTP/3 を自分から調べにいく人は少ない。だいたい次のどれかで踏むことになる。</p>
 
-<p>もう一つ。電車で Wi-Fi からモバイル回線に切り替わると通信が切れる。TCP コネクションは「送信元 IP:ポート / 宛先 IP:ポート」の 4 つ組で識別されるので、IP が変わればコネクションは別物になり、TLS ハンドシェイクからやり直しになる。</p>
+<ul>
+<li>CloudFront の設定画面に「HTTP/3」のトグルがあり、入れるべきか判断がつかない</li>
+<li>ファイアウォールで <strong>UDP/443 を開けてほしい</strong>と依頼が来て、通していいのか聞かれた</li>
+<li>ネットワーク側の検査装置に出てこない通信があり、調べたら QUIC だった</li>
+</ul>
 
-<p>この 2 つを解決するのが QUIC で、その上に載せた HTTP が HTTP/3。</p>
+<p>つまりトリガーは「学びたい」ではなく<strong>「有効にするか / 通すか」の判断を求められた</strong>とき。この記事はそこに答える形で書く。</p>
 
-<h2>QUIC とは</h2>
+<h2>なぜ HTTP/2 では足りなかったのか</h2>
 
-<p>UDP の上に、TCP + TLS 1.3 相当の機能を<strong>ユーザー空間で</strong>実装したトランスポートプロトコル（RFC 9000）。UDP を選んだのは速いからではなく、TCP がカーネル実装かつ中間機器に深く根付いていて、もう仕様を変えられないから。UDP は「ポート番号だけ付いた IP」なので、その上に自前で信頼性・輻輳制御・暗号化を作れる。</p>
+<p><strong>問題 1: パケットが 1 つ落ちると全部止まる。</strong> HTTP/2 は 1 本の TCP コネクションに複数ストリームを多重化する。だが TCP は順序保証をするので、パケットが 1 つ落ちるとその再送が届くまで<strong>後続の全ストリームがまとめて止まる</strong>。画像の 1 パケットが落ちて CSS の描画まで止まる。アプリ層で多重化しても、下の TCP がボトルネックになる。これが TCP Head-of-Line ブロッキング。</p>
 
-<h3>1. ストリームごとの独立した順序保証</h3>
-<p>QUIC は複数ストリームを持ち、<strong>ロスの影響が落ちたパケットのストリームだけに閉じる</strong>。画像のパケットが落ちても CSS の描画は進む。HTTP/2 が解けなかった HoL ブロッキングがここで解ける。</p>
+<p><strong>問題 2: IP が変わると切れる。</strong> TCP コネクションは「送信元 IP:ポート / 宛先 IP:ポート」で識別される。電車で Wi-Fi からモバイル回線に切り替わると IP が変わり、コネクションは別物として扱われ、TLS ハンドシェイクからやり直しになる。</p>
 
-<h3>2. Connection ID による接続維持</h3>
-<p>コネクションを IP:ポートではなく <strong>Connection ID</strong> で識別する。Wi-Fi → モバイルで IP が変わっても、同じ Connection ID なら同じ接続として継続（コネクションマイグレーション）。ハンドシェイクのやり直しが起きない。</p>
+<p>どちらも TCP そのものの性質なので、HTTP 側をいくら改良しても解けない。ではなぜ TCP を直さないのか——TCP はカーネル実装で、かつ中間機器（NAT・FW・ロードバランサ）がヘッダを読んで挙動を変えているため、事実上もう仕様を変えられない。</p>
 
-<h3>3. ハンドシェイクが 1-RTT / 0-RTT</h3>
-<p>TCP + TLS 1.3 は「TCP 3ウェイ（1-RTT）＋ TLS（1-RTT）」で最低 2-RTT。QUIC はトランスポートと TLS のハンドシェイクを統合して <strong>1-RTT</strong>、再訪問なら <strong>0-RTT</strong>（最初のパケットにデータを載せる）。RTT が大きいモバイル・遠距離ほど効く。</p>
+<h2>QUIC が変えたこと</h2>
 
-<h3>4. 暗号化の範囲が広い</h3>
-<p>TCP はヘッダが平文なので、中間機器がシーケンス番号を見て挙動を変えられた（それが TCP を進化できなくした原因でもある）。QUIC はペイロードだけでなく<strong>トランスポートヘッダのほぼ全体を暗号化</strong>する。中間機器から中身が見えない＝勝手にいじられない＝将来仕様を変えられる。</p>
-
-<h2>HTTP/1.1 → 2 → 3</h2>
+<p>そこで <strong>UDP の上に、TCP + TLS 1.3 相当を作り直した</strong>のが QUIC（RFC 9000）。UDP は「ポート番号が付いただけの IP」なので、その上に信頼性・輻輳制御・暗号化を自前で実装できる。しかもカーネルではなくユーザー空間（＝ブラウザとサーバーのアップデートだけ）で完結する。</p>
 
 <table>
-<tr><th></th><th>HTTP/1.1</th><th>HTTP/2</th><th>HTTP/3</th></tr>
-<tr><td>トランスポート</td><td>TCP</td><td>TCP</td><td>QUIC (UDP)</td></tr>
-<tr><td>多重化</td><td>なし（並列接続で代替）</td><td>あり</td><td>あり</td></tr>
-<tr><td>HoL ブロッキング</td><td>HTTP 層で発生</td><td>TCP 層で発生</td><td>解消</td></tr>
-<tr><td>ハンドシェイク</td><td>2-3 RTT</td><td>2-3 RTT</td><td>1-RTT / 0-RTT</td></tr>
-<tr><td>暗号化</td><td>任意（TLS）</td><td>事実上必須</td><td>必須（内蔵）</td></tr>
-<tr><td>ヘッダ圧縮</td><td>なし</td><td>HPACK</td><td>QPACK</td></tr>
-<tr><td>接続維持</td><td>IP 変更で切断</td><td>IP 変更で切断</td><td>マイグレーション可</td></tr>
+<tr><th>変えたこと</th><th>効果</th></tr>
+<tr><td>ストリームごとに独立して順序保証</td><td>ロスの影響が落ちたストリームだけに閉じる（問題 1 が解ける）</td></tr>
+<tr><td>コネクションを Connection ID で識別</td><td>IP が変わっても接続を継続（問題 2 が解ける）</td></tr>
+<tr><td>トランスポートと TLS のハンドシェイクを統合</td><td>2-RTT → 1-RTT。再訪問なら 0-RTT</td></tr>
+<tr><td>ヘッダまで含めてほぼ全体を暗号化</td><td>中間機器がいじれない＝今後も仕様を変えられる</td></tr>
 </table>
 
-<h2>どうやって HTTP/3 に切り替わるか</h2>
+<p>その QUIC の上に HTTP を載せたものが HTTP/3（RFC 9114）。HTTP のセマンティクス（メソッド、ステータスコード、ヘッダ）は HTTP/2 と同じで、変わったのは運び方だけ。アプリケーションのコードは書き換え不要。</p>
 
-<p>ブラウザはいきなり UDP で来ない。まず HTTP/1.1 か HTTP/2 で接続し、レスポンスヘッダの <code>Alt-Svc</code> を見て「次からは HTTP/3 で来い」と学習する。</p>
+<h2>効く場面と、効かない場面</h2>
+
+<p>「新しいから入れる」で判断しない。QUIC が解いた 2 つの問題は<strong>ロスがあり RTT が大きい経路</strong>にしか存在しない。</p>
+
+<table>
+<tr><th>効く</th><th>効かない（むしろ損）</th></tr>
+<tr><td>モバイル回線・海外リージョンからのアクセスなど、RTT が大きくロスが出る経路</td><td>データセンター内・同一 VPC 内の通信。ロスがほぼ無いので HoL ブロッキングが起きない</td></tr>
+<tr><td>移動しながら使われるクライアント（スマホアプリ、モバイルブラウザ）</td><td>サーバー間 API 通信。IP は変わらないしハンドシェイクも使い回している</td></tr>
+</table>
+
+<p>加えて、TCP はカーネル処理と NIC オフロードの恩恵を受けるが、<strong>QUIC はユーザー空間実装なのでパケット処理の CPU コストが乗る</strong>。低 RTT の環境で HTTP/3 にすると、速くならずに CPU だけ増えることがある。エンドユーザー向けの配信では入れる、内部通信では入れない、が基本線。</p>
+
+<h2>有効にしたのに h3 にならない</h2>
+
+<p>ブラウザはいきなり UDP では来ない。まず HTTP/1.1 か HTTP/2 で接続し、レスポンスヘッダの <code>Alt-Svc</code> を見て「次からは HTTP/3 で来い」と学習する。</p>
 
 <pre>Alt-Svc: h3=":443"; ma=86400</pre>
 
-<p>つまり <strong>初回アクセスは HTTP/3 にならない</strong>。「有効にしたのに Chrome DevTools で h3 にならない」の大半はこれで、リロードすれば h3 になる。</p>
+<p>したがって<strong>初回アクセスは必ず HTTP/3 にならない</strong>。「設定したのに DevTools で h3 と出ない」の大半はこれで、リロードすれば切り替わる。それでも変わらない場合は UDP/443 が経路で落とされている。</p>
 
-<h2>運用で引っかかるところ</h2>
+<h2>セキュリティ・監視への影響</h2>
+
+<p>実務で一番効いてくるのは速度ではなく、<strong>ネットワーク側の可視性が落ちること</strong>。</p>
 
 <ul>
-<li><strong>UDP/443 が閉じている</strong>：企業ファイアウォールやプロキシは UDP/443 をデフォルトで落とすことが多い。この場合ブラウザは TCP にフォールバックするので「壊れない代わりに速くならない」。導入したのに効果が出ないときはまずここを疑う。</li>
-<li><strong>CPU 負荷が高くなりがち</strong>：TCP はカーネル・NIC オフロードの恩恵を受けるが、QUIC はユーザー空間実装なのでパケット処理コストが乗る。低 RTT・低ロスのデータセンター内通信では HTTP/3 にしても速くならず、CPU だけ増えることがある。効くのは <strong>RTT が大きくロスがある経路</strong>（＝エンドユーザー向け）。</li>
-<li><strong>UDP リフレクション対策</strong>：QUIC はハンドシェイク中、クライアントの初期パケットに 1200 バイト以上のパディングを要求し、サーバーの応答量を制限する（増幅攻撃の緩和）。設定でここを緩めない。</li>
+<li><strong>IDS/IPS・DPI が中身を読めない</strong>：TCP はヘッダが平文なので中間点から状態を追えたが、QUIC はヘッダごと暗号化されている。キャプチャしても「UDP のバイト列」しか見えず、既存のネットワーク検知ルールは QUIC トラフィックに効かない</li>
+<li><strong>可視性はエンドポイント側に移す</strong>：見る場所をネットワーク中間点から、CloudFront / ALB のアクセスログ、WAF ログ、サーバーのアプリログへ寄せる。HTTP/3 を有効にする作業とセットで必要</li>
+<li><strong>egress の抜け道になり得る</strong>：正規の Web 通信と区別しづらい UDP/443 は、外部への持ち出し経路として悪用されやすい。外向き通信を絞っている環境では QUIC を通すかどうかを明示的に決める</li>
+<li><strong>塞いでも壊れない</strong>：UDP/443 を落としてもブラウザは TCP にフォールバックする。「速度を捨てて可視性を取る」という選択肢が実際に成立する。ただし黙って塞ぐと「なぜか遅い」の原因調査に時間を溶かすので、判断として記録に残す</li>
 </ul>
 
-<h2>セキュリティ・監視の観点</h2>
+<h3>提案するときの言い方</h3>
 
-<p>ネットワーク側の可視性が下がるのが最大の実務インパクト。</p>
+<table>
+<tr><th>技術的な言い方</th><th>ビジネス側に刺さる言い方</th></tr>
+<tr><td>CloudFront で HTTP/3 を有効化する</td><td>モバイル回線や海外からのアクセスの表示速度が上がる。アプリの改修は不要で、設定 1 つで済む</td></tr>
+<tr><td>QUIC はヘッダまで暗号化される</td><td>これまでネットワーク機器で見ていた通信内容が見えなくなる。監視をサーバー側のログに移す作業が必要になる</td></tr>
+<tr><td>egress で UDP/443 の扱いを決める</td><td>社内から外部へデータを持ち出す新しい経路が増える。通すか塞ぐかを決めずに放置するのが一番まずい</td></tr>
+</table>
 
-<ul>
-<li><strong>IDS/IPS・DPI が中身を見られない</strong>：TCP ならヘッダから状態を追えたが、QUIC は暗号化されているため、パケットキャプチャからは「UDP のバイト列」しか見えない。既存のネットワーク検知ルールは QUIC トラフィックに効かない。</li>
-<li><strong>ログはエンドポイント側で取る</strong>：可視性をネットワーク中間点からサーバー側（ALB / CloudFront のアクセスログ、WAF ログ）に寄せる必要がある。</li>
-<li><strong>ブロックすればフォールバックする</strong>：可視性を優先する環境では UDP/443 を落とす判断もあり得る。ブラウザは TCP に戻るので通信自体は壊れない。ただし「速度を捨てて可視性を取る」という明示的な選択であることを認識しておく。</li>
-<li><strong>C2 通信の隠れ蓑になり得る</strong>：正規の Web トラフィックと区別しづらい UDP/443 は、外部通信の抜け道として悪用されやすい。egress を絞る設計なら QUIC の扱いを決めておく。</li>
-</ul>
+<h2>実際の設定</h2>
 
-<blockquote>ビジネス側への言い方：「HTTP/3 はモバイルユーザーの体感速度を改善する。ただし通信が全部暗号化されるので、これまでネットワーク機器で見ていた通信内容が見えなくなる。監視をサーバー側のログに移す作業がセットで必要」</blockquote>
-
-<h2>マネージドサービスでの有効化</h2>
-
-<p>自前でサーバーを立てる場面は少なく、実務では CDN / ロードバランサ側の設定になる。</p>
+<p>自前でサーバーを立てる場面は少なく、CDN / ロードバランサ側の設定になる。</p>
 
 <ul>
-<li><strong>CloudFront</strong>：ディストリビューションの「サポートされている HTTP バージョン」で HTTP/3 を有効化。<code>Alt-Svc</code> は自動で付与される。</li>
-<li><strong>ALB</strong>：非対応（TCP ベース）。QUIC を通したい場合は NLB の UDP リスナー＋自前サーバー、または CloudFront を前段に置く。</li>
-<li><strong>nginx</strong>：1.25.0 以降で <code>listen 443 quic reuseport;</code> と <code>Alt-Svc</code> ヘッダの手動付与。</li>
+<li><strong>CloudFront</strong>：ディストリビューションの「サポートされている HTTP バージョン」で HTTP/3 を選ぶ。<code>Alt-Svc</code> は自動で付く</li>
+<li><strong>ALB</strong>：非対応。QUIC を通したいなら前段に CloudFront を置くか、NLB の UDP リスナー＋自前サーバー</li>
+<li><strong>nginx</strong>：1.25.0 以降。<code>listen 443 quic reuseport;</code> を足し、<code>Alt-Svc</code> は <code>add_header</code> で自分で付ける</li>
 </ul>
 
 <h2>参考</h2>
@@ -101,7 +107,6 @@ blockquote{border-left:3px solid #8888;margin:1rem 0;padding-left:1rem;color:#88
 <ul>
 <li><a href="https://www.rfc-editor.org/rfc/rfc9000.html">RFC 9000 - QUIC: A UDP-Based Multiplexed and Secure Transport</a></li>
 <li><a href="https://www.rfc-editor.org/rfc/rfc9114.html">RFC 9114 - HTTP/3</a></li>
-<li><a href="https://www.rfc-editor.org/rfc/rfc9204.html">RFC 9204 - QPACK</a></li>
 <li><a href="https://www.rfc-editor.org/rfc/rfc7838.html">RFC 7838 - HTTP Alternative Services (Alt-Svc)</a></li>
 <li><a href="https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html">Amazon CloudFront - ディストリビューション設定リファレンス</a></li>
 <li><a href="https://nginx.org/en/docs/http/ngx_http_v3_module.html">nginx - ngx_http_v3_module</a></li>
