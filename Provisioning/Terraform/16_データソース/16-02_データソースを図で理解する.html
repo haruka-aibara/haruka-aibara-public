@@ -35,9 +35,6 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:.9rem 1.1rem;margin:1.4rem 0}
 .note strong{color:var(--stop)}
 .note p{margin:.35rem 0}
-table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.93rem}
-th,td{border:1px solid var(--line);padding:.5rem .7rem;text-align:left;vertical-align:top}
-th{background:var(--lane);font-weight:600}
 code{background:var(--lane);padding:.1em .4em;border-radius:4px;font-size:.9em}
 pre{background:var(--lane);border:1px solid var(--line);border-radius:8px;padding:.8rem 1rem;overflow-x:auto;font-size:.87rem;line-height:1.65;margin:1rem 0}
 pre code{background:none;padding:0;font-size:1em}
@@ -104,7 +101,7 @@ a{color:var(--c1)}
   <line x1="308" y1="211" x2="196" y2="211" stroke="var(--c3)" stroke-width="1.8" marker-end="url(#ah-c3)"/>
   <text x="252" y="204" font-size="10.5" fill="var(--c3)" text-anchor="middle">読む（何も変えない）</text>
 </svg>
-<figcaption><code>data</code> は state に「読み取り結果のスナップショット」として記録されるが、それは実物の所有権を意味しない。<code>terraform destroy</code> しても <code>data</code> で参照した VPC は消えない。</figcaption>
+<figcaption><code>data</code> の読み取り結果は state に記録されるが、それは所有権を意味しない。<code>terraform destroy</code> しても <code>data</code> で参照した VPC は消えない。</figcaption>
 </figure>
 
 <h2>書き方</h2>
@@ -124,14 +121,37 @@ resource "aws_instance" "web" {
 }</code></pre>
 <p>参照は <code>data.タイプ.名前.属性</code>。<code>resource</code> の参照（<code>タイプ.名前.属性</code>）に <code>data.</code> が前置される形。</p>
 
+<h3>タグで引く</h3>
+<pre><code>data "aws_subnets" "shared_private" {
+  filter {
+    name   = "tag:Name"
+    values = ["shared-private-*"]
+  }
+}</code></pre>
+<p>他チームのリソースを参照するときは ID をハードコードせず、タグで引く。ID 直書きだと相手がリソースを作り直した瞬間に黙って壊れる。</p>
+
+<h3>アカウント・リージョンを埋め込む</h3>
+<pre><code>data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.region}"
+}</code></pre>
+<p>同じコードを dev / prod の別アカウントに適用しても、バケット名が自動で分かれる。</p>
+
+<div class="note">
+<p><strong>AWS プロバイダ v6 での変更</strong></p>
+<p><code>data.aws_region.current.name</code> は v6.0 で非推奨になり、<code>.region</code> に置き換わった。プロバイダを上げたときに大量の deprecation warning が出るのはこれ。</p>
+</div>
+
 <h2>いつ読まれるのか</h2>
 <p>「plan に <code>(known after apply)</code> が並んで、何が変わるのか読めない」——これの原因はたいてい <code>data</code> の読み取りタイミングにある。</p>
-<p>Terraform は <code>data</code> をできるだけ plan 時に読もうとする。ただし引数に「plan の時点で確定していない値」が混じっていると、読み取りが apply まで先送りされる。</p>
+<p>Terraform は <code>data</code> をできるだけ plan 時に読もうとする。ただし引数に「plan の時点で確定していない値」が混じると、読み取りが apply まで先送りされる。</p>
 
 <figure>
 <svg viewBox="0 0 700 236" role="img" aria-label="データソースがplan時に読まれる場合とapply時に先送りされる場合の比較">
-  <line x1="170" y1="24" x2="170" y2="206" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3" opacity=".5"/>
-  <line x1="470" y1="24" x2="470" y2="206" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3" opacity=".5"/>
+  <line x1="170" y1="24" x2="170" y2="190" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3" opacity=".5"/>
+  <line x1="470" y1="24" x2="470" y2="190" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3" opacity=".5"/>
   <text x="170" y="16" font-size="11.5" font-weight="600" fill="var(--muted)" text-anchor="middle">terraform plan</text>
   <text x="470" y="16" font-size="11.5" font-weight="600" fill="var(--muted)" text-anchor="middle">terraform apply</text>
 
@@ -150,118 +170,16 @@ resource "aws_instance" "web" {
   <text x="224" y="169" font-size="11" fill="var(--stop)">(known after apply)</text>
   <text x="516" y="169" font-size="11" fill="var(--ink)">ここで初めて確定</text>
 
-  <text x="20" y="204" font-size="11" fill="var(--muted)">B では未確定が依存先の resource にも波及する。「何が変わるか分からない plan」を承認する形になり、</text>
-  <text x="20" y="222" font-size="11" fill="var(--muted)">レビューを前提にした CI では避けたい。</text>
+  <text x="20" y="212" font-size="11" fill="var(--muted)">B では未確定が依存先の resource にも波及し、「何が変わるか分からない plan」を承認する形になる。</text>
 </svg>
-<figcaption><code>depends_on</code> を <code>data</code> に付けると、引数が確定していても無条件に B の挙動になる。まず属性参照による暗黙の依存で解けないかを疑い、<code>depends_on</code> は本当に参照で表現できないとき（IAM ポリシーの伝播待ちなど）だけに絞る。</figcaption>
+<figcaption><code>depends_on</code> を <code>data</code> に付けると、引数が確定していても無条件に B になる。まず属性参照による暗黙の依存で解けないかを疑い、<code>depends_on</code> は参照で表現できないとき（IAM ポリシーの伝播待ちなど）だけに絞る。</figcaption>
 </figure>
-
-<h2>どれを使うか</h2>
-<p><code>data</code> か <code>resource</code> かで迷うことは少ないが、<code>import</code> や <code>terraform_remote_state</code> とは境界が曖昧になりやすい。</p>
-
-<figure>
-<svg viewBox="0 0 700 300" role="img" aria-label="resource・import・terraform_remote_state・dataの使い分け判断フロー">
-  <defs>
-    <marker id="ah-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/>
-    </marker>
-  </defs>
-
-  <rect x="8" y="112" width="168" height="66" rx="7" fill="var(--card)" stroke="var(--ink)" stroke-width="1.4"/>
-  <text x="92" y="139" font-size="11" fill="var(--ink)" text-anchor="middle">このリソースを</text>
-  <text x="92" y="156" font-size="11" fill="var(--ink)" text-anchor="middle">作成・変更・削除する？</text>
-
-  <rect x="228" y="42" width="164" height="58" rx="7" fill="var(--card)" stroke="var(--ink)" stroke-width="1.4"/>
-  <text x="310" y="66" font-size="11" fill="var(--ink)" text-anchor="middle">実物はもう</text>
-  <text x="310" y="83" font-size="11" fill="var(--ink)" text-anchor="middle">存在している？</text>
-
-  <rect x="228" y="196" width="164" height="58" rx="7" fill="var(--card)" stroke="var(--ink)" stroke-width="1.4"/>
-  <text x="310" y="220" font-size="11" fill="var(--ink)" text-anchor="middle">別の Terraform 構成の</text>
-  <text x="310" y="237" font-size="11" fill="var(--ink)" text-anchor="middle">output に出ている？</text>
-
-  <rect x="444" y="14" width="248" height="46" rx="7" fill="var(--c2)"/>
-  <text x="458" y="34" font-size="11.5" font-weight="600" fill="var(--on)">import</text>
-  <text x="458" y="50" font-size="10.5" fill="var(--on)" opacity=".9">state に取り込んで resource として管理</text>
-
-  <rect x="444" y="80" width="248" height="46" rx="7" fill="var(--c1)"/>
-  <text x="458" y="100" font-size="11.5" font-weight="600" fill="var(--on)">resource</text>
-  <text x="458" y="116" font-size="10.5" fill="var(--on)" opacity=".9">新規に作って所有する</text>
-
-  <rect x="444" y="176" width="248" height="46" rx="7" fill="var(--c4)"/>
-  <text x="458" y="196" font-size="11.5" font-weight="600" fill="var(--on)">terraform_remote_state</text>
-  <text x="458" y="212" font-size="10.5" fill="var(--on)" opacity=".9">相手の output をそのまま受け取る</text>
-
-  <rect x="444" y="242" width="248" height="46" rx="7" fill="var(--c3)"/>
-  <text x="458" y="262" font-size="11.5" font-weight="600" fill="var(--on)">data</text>
-  <text x="458" y="278" font-size="10.5" fill="var(--on)" opacity=".9">プロバイダの API で実物を検索して読む</text>
-
-  <path d="M176,145 H202 V71 H228" fill="none" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ah-m)"/>
-  <text x="200" y="108" font-size="10.5" fill="var(--muted)" text-anchor="middle">する</text>
-  <path d="M176,145 H202 V225 H228" fill="none" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ah-m)"/>
-  <text x="199" y="188" font-size="10.5" fill="var(--muted)" text-anchor="middle">参照するだけ</text>
-
-  <path d="M392,71 H418 V37 H444" fill="none" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ah-m)"/>
-  <text x="416" y="30" font-size="10.5" fill="var(--muted)" text-anchor="middle">はい</text>
-  <path d="M392,71 H418 V103 H444" fill="none" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ah-m)"/>
-  <text x="416" y="136" font-size="10.5" fill="var(--muted)" text-anchor="middle">いいえ</text>
-
-  <path d="M392,225 H418 V199 H444" fill="none" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ah-m)"/>
-  <text x="416" y="168" font-size="10.5" fill="var(--muted)" text-anchor="middle">はい</text>
-  <path d="M392,225 H418 V265 H444" fill="none" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ah-m)"/>
-  <text x="416" y="292" font-size="10.5" fill="var(--muted)" text-anchor="middle">いいえ</text>
-</svg>
-<figcaption><code>terraform_remote_state</code> は相手の state ファイル全体への読み取り権限を要求する（output だけを選んで読むことはできない）。相手の state に秘密が含まれるなら、<code>data</code> でリソースを直接検索するか、SSM パラメータストア経由で受け渡すほうが権限を絞れる。</figcaption>
-</figure>
-
-<h2>よく使う場面</h2>
-
-<h3>別チームが管理しているリソースを使う</h3>
-<pre><code>data "aws_subnets" "shared_private" {
-  filter {
-    name   = "tag:Name"
-    values = ["shared-private-*"]
-  }
-}
-
-resource "aws_ecs_service" "app" {
-  network_configuration {
-    subnets = data.aws_subnets.shared_private.ids
-  }
-}</code></pre>
-<p>タグで引くのがポイント。ID をハードコードすると、相手側がリソースを作り直したときに黙って壊れる。</p>
-
-<h3>実行中のアカウント・リージョンを埋め込む</h3>
-<pre><code>data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
-
-resource "aws_s3_bucket" "logs" {
-  bucket = "logs-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.region}"
-}</code></pre>
-<p>同じコードを dev / prod の別アカウントに適用しても、バケット名が自動で分かれる。</p>
-
-<div class="note">
-<p><strong>AWS プロバイダ v6 での変更</strong></p>
-<p><code>data.aws_region.current.name</code> は v6.0 で非推奨になり、<code>.region</code> に置き換わった。v7 での削除が予告されている。プロバイダを上げたときに大量の deprecation warning が出るのはこれ。</p>
-</div>
-
-<h3>IAM ポリシーを JSON 直書きせずに組み立てる</h3>
-<pre><code>data "aws_iam_policy_document" "s3_read" {
-  statement {
-    actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.logs.arn}/*"]
-  }
-}
-
-resource "aws_iam_role_policy" "app" {
-  policy = data.aws_iam_policy_document.s3_read.json
-}</code></pre>
-<p>これは外部を読みに行かない「ローカル完結型」の <code>data</code>。API を呼ばず、HCL を JSON に変換するだけ。<code>jsonencode()</code> と違って構文チェックが効き、複数ポリシーの合成（<code>source_policy_documents</code>）もできる。</p>
 
 <h2>ハマりどころ</h2>
 <ul>
-<li><strong>見つからないとエラーで止まる</strong>：<code>data</code> はマッチしないと <code>no matching X found</code> で plan ごと失敗する。<code>null</code> は返らないし <code>try()</code> でも握りつぶせない——エラーは式の評価ではなく読み取りの時点で起きるため。存在が不確実なものを参照したいなら、<code>count</code> で読み取り自体をスキップする。</li>
+<li><strong>見つからないとエラーで止まる</strong>：マッチしないと <code>no matching X found</code> で plan ごと失敗する。<code>null</code> は返らないし <code>try()</code> でも握りつぶせない——エラーは式の評価ではなく読み取りの時点で起きるため。存在が不確実なら <code>count</code> で読み取り自体をスキップする。</li>
 <li><strong>複数マッチしてもエラー</strong>：<code>aws_ami</code> や <code>aws_subnet</code> のような単数形は「ちょうど1件」を要求する。フィルタが緩いと、リソースが増えた日に突然壊れる。複数前提なら <code>aws_subnets</code> のような複数形を使う。</li>
-<li><strong>モジュールを呼ぶ数だけ API が叩かれる</strong>：モジュール内に <code>data "aws_ami"</code> を置いて 30 回呼べば、plan のたびに 30 回リクエストが飛ぶ。plan が遅い・スロットリングされる場合はここを疑い、ルート側で一度読んで変数で渡す。</li>
+<li><strong>読み取り結果は state に平文で残る</strong>：<code>sensitive</code> は CLI 出力のマスクであって、state の中身は隠れない。<code>data "aws_secretsmanager_secret_version"</code> でパスワードを読めば、state バケットを読める人全員がそれを読める。秘密は <code>data</code> ではなく <code>ephemeral</code>（Terraform 1.10+）で扱う。→ <a href="../22_セキュリティ/22-05_シークレット管理.md">22-05 シークレット管理</a></li>
 </ul>
 
 <h3>most_recent = true は「変更のトリガー」でもある</h3>
@@ -302,62 +220,10 @@ resource "aws_iam_role_policy" "app" {
 <figcaption>無関係な変更のつもりで <code>apply</code> したら本番インスタンスが入れ替わる、という事故がこれ。AMI をバージョン固定して更新を意図的な PR にするか、Auto Scaling + Launch Template のように入れ替えが安全な構成にしておく。</figcaption>
 </figure>
 
-<h2>セキュリティ視点</h2>
-<p><code>data</code> の読み取り結果は state に平文で書かれる。属性に <code>sensitive</code> が付いていてもそれは CLI 出力のマスクであって、state ファイルの中身は隠れない。</p>
-<p>つまり <code>data "aws_secretsmanager_secret_version"</code> でパスワードを取得した瞬間、<strong>state バケットを読める人全員がそのパスワードを読める</strong>ようになる。Terraform 1.10 の <code>ephemeral</code> はここを塞ぐために入った。</p>
-
-<figure>
-<svg viewBox="0 0 700 250" role="img" aria-label="dataで秘密を読むとstateに残るが、ephemeralなら残らないという比較">
-  <defs>
-    <marker id="ah-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/>
-    </marker>
-  </defs>
-
-  <text x="20" y="14" font-size="12.5" font-weight="600" fill="var(--ink)">data で読む</text>
-  <rect x="20" y="24" width="310" height="40" rx="6" fill="var(--c3)"/>
-  <text x="175" y="49" font-size="10.5" fill="var(--on)" text-anchor="middle">data "aws_secretsmanager_secret_version"</text>
-  <line x1="175" y1="66" x2="175" y2="86" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ah-d)"/>
-  <rect x="20" y="90" width="310" height="36" rx="6" fill="var(--lane)"/>
-  <text x="175" y="113" font-size="10.5" fill="var(--ink)" text-anchor="middle">resource の引数に渡して apply</text>
-  <line x1="175" y1="128" x2="175" y2="148" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ah-d)"/>
-  <rect x="20" y="152" width="310" height="72" rx="6" fill="var(--warn-bg)" stroke="var(--warn-line)" stroke-width="1.4"/>
-  <text x="175" y="176" font-size="11" font-weight="600" fill="var(--stop)" text-anchor="middle">state / plan ファイルに平文で残る</text>
-  <text x="175" y="196" font-size="10.5" fill="var(--stop)" text-anchor="middle">state バケットの読み取り権限</text>
-  <text x="175" y="212" font-size="10.5" fill="var(--stop)" text-anchor="middle">＝ 秘密の読み取り権限</text>
-
-  <text x="370" y="14" font-size="12.5" font-weight="600" fill="var(--ink)">ephemeral で読む（Terraform 1.10+）</text>
-  <rect x="370" y="24" width="310" height="40" rx="6" fill="var(--c4)"/>
-  <text x="525" y="49" font-size="10.5" fill="var(--on)" text-anchor="middle">ephemeral "aws_secretsmanager_secret_version"</text>
-  <line x1="525" y1="66" x2="525" y2="86" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ah-d)"/>
-  <rect x="370" y="90" width="310" height="36" rx="6" fill="var(--lane)"/>
-  <text x="525" y="113" font-size="10.5" fill="var(--ink)" text-anchor="middle">write-only 引数に渡す（1.11+）</text>
-  <line x1="525" y1="128" x2="525" y2="148" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ah-d)"/>
-  <rect x="370" y="152" width="310" height="72" rx="6" fill="var(--card)" stroke="var(--c3)" stroke-width="1.4"/>
-  <text x="525" y="176" font-size="11" font-weight="600" fill="var(--c3)" text-anchor="middle">state にも plan にも残らない</text>
-  <text x="525" y="196" font-size="10.5" fill="var(--muted)" text-anchor="middle">値はその実行中だけメモリ上に存在し</text>
-  <text x="525" y="212" font-size="10.5" fill="var(--muted)" text-anchor="middle">終了時に破棄される</text>
-</svg>
-<figcaption>すでに <code>data</code> で秘密を読んでいたコードを <code>ephemeral</code> に書き換えても、過去の state に残った値は消えない。移行時は state のバージョン履歴ごと洗い直すか、その秘密をローテーションする。</figcaption>
-</figure>
-
-<p>もうひとつ、権限設計にも影響する。<code>data</code> はプロバイダの API を叩くので、<strong><code>plan</code> を回すだけでも読み取り権限が要る</strong>。CI で plan と apply のロールを分けるとき、plan 側を「権限ゼロ」にはできない——<code>data</code> が触る範囲の <code>Describe*</code> / <code>Get*</code> が必要になる。逆に言えば、plan 用ロールは読み取り専用で足りるので、<strong>PR 時点では書き込み権限を一切渡さない</strong>設計が成立する。</p>
-
-<table>
-<tr><th>技術的な言い方</th><th>ビジネス側に刺さる言い方</th></tr>
-<tr><td>秘密は <code>data</code> ではなく <code>ephemeral</code> で読む</td><td>state ファイルを一度でも取られたら DB パスワードごと流出する。そこを構造的に断つ</td></tr>
-<tr><td>plan 用ロールを読み取り専用に分離する</td><td>PR のレビュー段階では、AI もエンジニアも本番を変更する権限を一切持たない状態にできる</td></tr>
-<tr><td>他チームのリソースは <code>resource</code> ではなく <code>data</code> で参照する</td><td>設定ミス1つで他チームの本番を消す、という事故の経路をなくす</td></tr>
-</table>
-
 <h2>参考</h2>
 <ul>
 <li><a href="https://developer.hashicorp.com/terraform/language/data-sources">Terraform - Query data from external sources（Data Sources）</a></li>
 <li><a href="https://developer.hashicorp.com/terraform/language/meta-arguments/depends_on">Terraform - depends_on meta-argument</a></li>
-<li><a href="https://developer.hashicorp.com/terraform/language/state/remote-state-data">Terraform - The terraform_remote_state Data Source</a></li>
-<li><a href="https://developer.hashicorp.com/terraform/language/manage-sensitive-data/ephemeral">Terraform - Ephemeral values in resources</a></li>
-<li><a href="https://www.hashicorp.com/en/blog/terraform-1-10-improves-handling-secrets-in-state-with-ephemeral-values">HashiCorp - Terraform 1.10 improves handling secrets in state with ephemeral values</a></li>
-<li><a href="https://www.hashicorp.com/en/blog/terraform-1-11-ephemeral-values-managed-resources-write-only-arguments">HashiCorp - Terraform 1.11 brings ephemeral values to managed resources with write-only arguments</a></li>
 <li><a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/enhanced-region-support">Terraform AWS Provider - Enhanced Region Support</a></li>
 <li><a href="https://sanderknape.com/2024/11/terraform-data-source-read-during-apply-messages-fix/">Sander Knape - Terraform 'data source will be read during apply' messages</a></li>
 </ul>
