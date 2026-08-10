@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WPA のパーソナルモードとエンタープライズモード</title>
+<style>
+:root{
+  --bg:#fbfaf8; --card:#fff; --ink:#23201d; --muted:#6b645c; --line:#e3ded6;
+  --lane:#eeeae4; --warn-bg:#fdf3f1; --warn-line:#e0b4ac;
+  --c1:#3d6b9c; --c2:#b8562f; --c3:#5f8248; --c4:#7a63a0; --stop:#c2453a; --on:#fff;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#17161a; --card:#1e1d22; --ink:#e8e4dd; --muted:#9d968c; --line:#34323a;
+    --lane:#2a2830; --warn-bg:#2a1e1d; --warn-line:#6b3b35;
+    --c1:#5c8cc0; --c2:#cf6c42; --c3:#77a05c; --c4:#9680bd; --stop:#d75b4f; --on:#15141a;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:2.5rem 1.25rem 5rem;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  line-height:1.85;font-size:16px;
+}
+main{max-width:52rem;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.35;margin:0 0 .4rem}
+.lede{color:var(--muted);margin:0 0 2.5rem;font-size:1.02rem}
+h2{font-size:1.25rem;margin:3rem 0 .6rem;padding-top:1.4rem;border-top:1px solid var(--line)}
+h3{font-size:1.02rem;margin:1.8rem 0 .4rem}
+p{margin:.7rem 0}
+figure{margin:1.4rem 0;padding:1.1rem 1.1rem .8rem;background:var(--card);border:1px solid var(--line);border-radius:10px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
+.note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:.9rem 1.1rem;margin:1.4rem 0}
+.note strong{color:var(--stop)}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.93rem}
+th,td{border:1px solid var(--line);padding:.5rem .7rem;text-align:left;vertical-align:top}
+th{background:var(--lane);font-weight:600}
+code{background:var(--lane);padding:.1em .4em;border-radius:4px;font-size:.9em}
+ul{padding-left:1.3rem}li{margin:.35rem 0}
+a{color:var(--c1)}
+</style>
+</head>
+<body>
+<main>
+
+<h1>WPA のパーソナルモードとエンタープライズモード</h1>
+<p class="lede">合言葉を全員で共有するか、一人ひとり別に認証するか。同じ WPA2/WPA3 でも運用がまるで変わる。</p>
+<h2>「退職者が出たら全端末を設定し直す」問題</h2>
+<p>家庭やお店の Wi-Fi は、1 つの合言葉（事前共有鍵、PSK）を全員で使う——これが<strong>パーソナルモード</strong>。手軽だが、合言葉を知っている人は全員同じ資格になるので、<strong>誰か 1 人が辞めたり漏らしたりすると全員分を変えるしかない</strong>。誰がつないでいたのかも分からない。</p>
+<p><strong>エンタープライズモード</strong>は合言葉を共有しない。接続してきた端末ごとに認証サーバ（RADIUS）へ問い合わせ、<strong>個人のアカウントや証明書</strong>で確認する。1 人だけ止めることができ、記録も個人単位で残る。</p>
+
+<figure>
+<svg viewBox="0 0 700 246" role="img" aria-label="パーソナルモードとエンタープライズモードの違い">
+  <defs>
+    <marker id="pe" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c1)"/></marker>
+  </defs>
+  <text x="0" y="14" font-size="11.5" font-weight="600" fill="var(--c2)">パーソナル（PSK）</text>
+  <rect x="0" y="24" width="130" height="34" rx="6" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="65" y="46" font-size="10.5" fill="var(--ink)" text-anchor="middle">端末 A</text>
+  <rect x="0" y="64" width="130" height="34" rx="6" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="65" y="86" font-size="10.5" fill="var(--ink)" text-anchor="middle">端末 B</text>
+  <rect x="0" y="104" width="130" height="34" rx="6" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="65" y="126" font-size="10.5" fill="var(--ink)" text-anchor="middle">端末 C</text>
+  <rect x="180" y="54" width="200" height="54" rx="7" fill="var(--warn-bg)" stroke="var(--warn-line)"/>
+  <text x="280" y="77" font-size="11" fill="var(--stop)" text-anchor="middle">全員が同じ合言葉</text>
+  <text x="280" y="95" font-size="10.5" fill="var(--stop)" text-anchor="middle">＝区別できない</text>
+  <line x1="134" y1="41" x2="174" y2="66" stroke="var(--muted)"/>
+  <line x1="134" y1="81" x2="174" y2="81" stroke="var(--muted)"/>
+  <line x1="134" y1="121" x2="174" y2="96" stroke="var(--muted)"/>
+  <rect x="430" y="54" width="270" height="54" rx="7" fill="var(--card)" stroke="var(--line)"/>
+  <text x="565" y="77" font-size="10.5" fill="var(--muted)" text-anchor="middle">1 人が漏らしたら全端末で変更</text>
+  <text x="565" y="95" font-size="10.5" fill="var(--muted)" text-anchor="middle">誰がつないだかは残らない</text>
+
+  <line x1="0" y1="156" x2="700" y2="156" stroke="var(--line)"/>
+
+  <text x="0" y="182" font-size="11.5" font-weight="600" fill="var(--c3)">エンタープライズ（802.1X）</text>
+  <rect x="0" y="192" width="130" height="40" rx="6" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="65" y="217" font-size="10.5" fill="var(--ink)" text-anchor="middle">端末（個人 ID）</text>
+  <line x1="134" y1="212" x2="216" y2="212" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#pe)"/>
+  <rect x="222" y="192" width="130" height="40" rx="6" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="287" y="217" font-size="10.5" fill="var(--ink)" text-anchor="middle">アクセスポイント</text>
+  <line x1="356" y1="212" x2="438" y2="212" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#pe)"/>
+  <rect x="444" y="192" width="150" height="40" rx="6" fill="var(--card)" stroke="var(--c3)"/>
+  <text x="519" y="217" font-size="10.5" fill="var(--c3)" text-anchor="middle">認証サーバ（RADIUS）</text>
+  <text x="650" y="207" font-size="10.5" fill="var(--c3)" text-anchor="middle">1 人だけ</text>
+  <text x="650" y="224" font-size="10.5" fill="var(--c3)" text-anchor="middle">止められる</text>
+</svg>
+<figcaption>暗号の強さ自体は同じ。違うのは「鍵をどう配るか」で、エンタープライズでは端末ごとに別の暗号鍵が渡されるため、同じネットワークの他人に通信を復号されることもない。</figcaption>
+</figure>
+
+<h2>参考</h2>
+<ul>
+<li><a href="https://www.wi-fi.org/discover-wi-fi/security">Wi-Fi Alliance — Security</a></li>
+</ul>
+
+</main>
+</body>
+</html>

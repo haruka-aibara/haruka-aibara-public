@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>無線 LAN のアクセス手順</title>
+<style>
+:root{
+  --bg:#fbfaf8; --card:#fff; --ink:#23201d; --muted:#6b645c; --line:#e3ded6;
+  --lane:#eeeae4; --warn-bg:#fdf3f1; --warn-line:#e0b4ac;
+  --c1:#3d6b9c; --c2:#b8562f; --c3:#5f8248; --c4:#7a63a0; --stop:#c2453a; --on:#fff;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#17161a; --card:#1e1d22; --ink:#e8e4dd; --muted:#9d968c; --line:#34323a;
+    --lane:#2a2830; --warn-bg:#2a1e1d; --warn-line:#6b3b35;
+    --c1:#5c8cc0; --c2:#cf6c42; --c3:#77a05c; --c4:#9680bd; --stop:#d75b4f; --on:#15141a;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:2.5rem 1.25rem 5rem;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  line-height:1.85;font-size:16px;
+}
+main{max-width:52rem;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.35;margin:0 0 .4rem}
+.lede{color:var(--muted);margin:0 0 2.5rem;font-size:1.02rem}
+h2{font-size:1.25rem;margin:3rem 0 .6rem;padding-top:1.4rem;border-top:1px solid var(--line)}
+h3{font-size:1.02rem;margin:1.8rem 0 .4rem}
+p{margin:.7rem 0}
+figure{margin:1.4rem 0;padding:1.1rem 1.1rem .8rem;background:var(--card);border:1px solid var(--line);border-radius:10px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
+.note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:.9rem 1.1rem;margin:1.4rem 0}
+.note strong{color:var(--stop)}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.93rem}
+th,td{border:1px solid var(--line);padding:.5rem .7rem;text-align:left;vertical-align:top}
+th{background:var(--lane);font-weight:600}
+code{background:var(--lane);padding:.1em .4em;border-radius:4px;font-size:.9em}
+ul{padding-left:1.3rem}li{margin:.35rem 0}
+a{color:var(--c1)}
+</style>
+</head>
+<body>
+<main>
+
+<h1>無線 LAN のアクセス手順</h1>
+<p class="lede">「Wi-Fi につながった」までに、実は 3 つの段階を踏んでいる。</p>
+<h2>探す → 認証 → 結び付け</h2>
+<p>SSID を選んでパスワードを入れると一瞬でつながるように見えるが、内部では順番の決まった手順が走っている。トラブルの切り分けでは<strong>どの段階で止まったか</strong>が効くので、区切りだけ知っておくと役に立つ。</p>
+
+<figure>
+<svg viewBox="0 0 700 214" role="img" aria-label="無線LANの接続手順の4段階">
+  <defs>
+    <marker id="st" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/></marker>
+  </defs>
+  <rect x="0" y="24" width="160" height="52" rx="7" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="80" y="46" font-size="11.5" font-weight="600" fill="var(--ink)" text-anchor="middle">① スキャン</text>
+  <text x="80" y="64" font-size="10.5" fill="var(--muted)" text-anchor="middle">近くの AP を探す</text>
+
+  <rect x="180" y="24" width="160" height="52" rx="7" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="260" y="46" font-size="11.5" font-weight="600" fill="var(--ink)" text-anchor="middle">② 認証</text>
+  <text x="260" y="64" font-size="10.5" fill="var(--muted)" text-anchor="middle">つないでよい相手か</text>
+
+  <rect x="360" y="24" width="160" height="52" rx="7" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="440" y="46" font-size="11.5" font-weight="600" fill="var(--ink)" text-anchor="middle">③ アソシエーション</text>
+  <text x="440" y="64" font-size="10.5" fill="var(--muted)" text-anchor="middle">この AP に所属する</text>
+
+  <rect x="540" y="24" width="160" height="52" rx="7" fill="var(--card)" stroke="var(--c3)"/>
+  <text x="620" y="46" font-size="11.5" font-weight="600" fill="var(--c3)" text-anchor="middle">④ 鍵の交換</text>
+  <text x="620" y="64" font-size="10.5" fill="var(--muted)" text-anchor="middle">暗号鍵を決める</text>
+
+  <line x1="164" y1="50" x2="176" y2="50" stroke="var(--muted)" marker-end="url(#st)"/>
+  <line x1="344" y1="50" x2="356" y2="50" stroke="var(--muted)" marker-end="url(#st)"/>
+  <line x1="524" y1="50" x2="536" y2="50" stroke="var(--muted)" marker-end="url(#st)"/>
+
+  <text x="80" y="102" font-size="10.5" fill="var(--muted)" text-anchor="middle">AP のビーコンを</text>
+  <text x="80" y="119" font-size="10.5" fill="var(--muted)" text-anchor="middle">待つ（パッシブ）か、</text>
+  <text x="80" y="136" font-size="10.5" fill="var(--muted)" text-anchor="middle">こちらから呼びかける</text>
+  <text x="80" y="153" font-size="10.5" fill="var(--muted)" text-anchor="middle">（アクティブ）</text>
+
+  <text x="260" y="102" font-size="10.5" fill="var(--muted)" text-anchor="middle">ここは形だけの</text>
+  <text x="260" y="119" font-size="10.5" fill="var(--muted)" text-anchor="middle">段階で、パスワードの</text>
+  <text x="260" y="136" font-size="10.5" fill="var(--muted)" text-anchor="middle">確認はまだしない</text>
+
+  <text x="440" y="102" font-size="10.5" fill="var(--muted)" text-anchor="middle">AP が端末に ID を</text>
+  <text x="440" y="119" font-size="10.5" fill="var(--muted)" text-anchor="middle">割り当てる。ここまでで</text>
+  <text x="440" y="136" font-size="10.5" fill="var(--muted)" text-anchor="middle">「接続済み」の扱い</text>
+
+  <text x="620" y="102" font-size="10.5" fill="var(--c3)" text-anchor="middle">合言葉が違うと</text>
+  <text x="620" y="119" font-size="10.5" fill="var(--c3)" text-anchor="middle">ここで失敗する</text>
+  <text x="620" y="136" font-size="10.5" fill="var(--muted)" text-anchor="middle">（4 ウェイ</text>
+  <text x="620" y="153" font-size="10.5" fill="var(--muted)" text-anchor="middle">ハンドシェイク）</text>
+
+  <rect x="0" y="172" width="700" height="34" rx="6" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="350" y="194" font-size="10.5" fill="var(--muted)" text-anchor="middle">この後さらに DHCP で IP アドレスを取って、ようやく通信できる状態になる</text>
+</svg>
+<figcaption>「Wi-Fi マークは立っているのにインターネットに出られない」は ④ まで終わって DHCP でつまずいた状態。「パスワードが違います」は ④ の失敗。</figcaption>
+</figure>
+
+<h2>参考</h2>
+<ul>
+<li><a href="https://standards.ieee.org/ieee/802.11/7028/">IEEE 802.11 — Wireless LAN MAC and PHY Specifications</a></li>
+</ul>
+
+</main>
+</body>
+</html>

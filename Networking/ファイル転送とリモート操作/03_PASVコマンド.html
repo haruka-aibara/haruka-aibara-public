@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PASV コマンド</title>
+<style>
+:root{
+  --bg:#fbfaf8; --card:#fff; --ink:#23201d; --muted:#6b645c; --line:#e3ded6;
+  --lane:#eeeae4; --warn-bg:#fdf3f1; --warn-line:#e0b4ac;
+  --c1:#3d6b9c; --c2:#b8562f; --c3:#5f8248; --c4:#7a63a0; --stop:#c2453a; --on:#fff;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#17161a; --card:#1e1d22; --ink:#e8e4dd; --muted:#9d968c; --line:#34323a;
+    --lane:#2a2830; --warn-bg:#2a1e1d; --warn-line:#6b3b35;
+    --c1:#5c8cc0; --c2:#cf6c42; --c3:#77a05c; --c4:#9680bd; --stop:#d75b4f; --on:#15141a;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:2.5rem 1.25rem 5rem;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  line-height:1.85;font-size:16px;
+}
+main{max-width:52rem;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.35;margin:0 0 .4rem}
+.lede{color:var(--muted);margin:0 0 2.5rem;font-size:1.02rem}
+h2{font-size:1.25rem;margin:3rem 0 .6rem;padding-top:1.4rem;border-top:1px solid var(--line)}
+h3{font-size:1.02rem;margin:1.8rem 0 .4rem}
+p{margin:.7rem 0}
+figure{margin:1.4rem 0;padding:1.1rem 1.1rem .8rem;background:var(--card);border:1px solid var(--line);border-radius:10px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
+.note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:.9rem 1.1rem;margin:1.4rem 0}
+.note strong{color:var(--stop)}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.93rem}
+th,td{border:1px solid var(--line);padding:.5rem .7rem;text-align:left;vertical-align:top}
+th{background:var(--lane);font-weight:600}
+code{background:var(--lane);padding:.1em .4em;border-radius:4px;font-size:.9em}
+ul{padding-left:1.3rem}li{margin:.35rem 0}
+a{color:var(--c1)}
+</style>
+</head>
+<body>
+<main>
+
+<h1>PASV コマンド</h1>
+<p class="lede">パッシブモードに切り替えるための、たった 1 つの命令。</p>
+<h2>「そっちで待ち受けて、ポートを教えて」</h2>
+<p>クライアントは制御コネクションで <code>PASV</code> と送る。サーバは待ち受けを用意して、その<strong>アドレスとポート番号を応答で返す</strong>。クライアントはそこへデータコネクションを張る。パッシブモードの実体はこのやりとりだけ。</p>
+
+<figure>
+<svg viewBox="0 0 700 218" role="img" aria-label="PASVコマンドのやりとり">
+  <defs>
+    <marker id="pv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c1)"/></marker>
+    <marker id="pv2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c2)"/></marker>
+  </defs>
+  <rect x="0" y="0" width="150" height="30" rx="6" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="75" y="20" font-size="11" fill="var(--ink)" text-anchor="middle">クライアント</text>
+  <rect x="550" y="0" width="150" height="30" rx="6" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="625" y="20" font-size="11" fill="var(--ink)" text-anchor="middle">サーバ</text>
+  <line x1="75" y1="34" x2="75" y2="210" stroke="var(--line)" stroke-width="1.5"/>
+  <line x1="625" y1="34" x2="625" y2="210" stroke="var(--line)" stroke-width="1.5"/>
+
+  <line x1="79" y1="62" x2="617" y2="62" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#pv)"/>
+  <text x="350" y="54" font-size="11" fill="var(--c1)" text-anchor="middle">PASV</text>
+
+  <line x1="621" y1="106" x2="83" y2="106" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#pv)"/>
+  <text x="350" y="98" font-size="11" fill="var(--c1)" text-anchor="middle">227 Entering Passive Mode (203,0,113,7,204,173)</text>
+  <text x="350" y="124" font-size="10.5" fill="var(--muted)" text-anchor="middle">前の 4 つが IP アドレス、後ろの 2 つがポート番号（204 × 256 + 173 = 52397）</text>
+
+  <line x1="79" y1="168" x2="617" y2="168" stroke="var(--c2)" stroke-width="1.8" marker-end="url(#pv2)"/>
+  <text x="350" y="160" font-size="11" fill="var(--c2)" text-anchor="middle">203.0.113.7:52397 へデータコネクションを張る</text>
+  <text x="350" y="192" font-size="10.5" fill="var(--muted)" text-anchor="middle">以降、ファイルの中身はこちらを流れる</text>
+</svg>
+<figcaption>ポート番号が 2 つの数字に割れているのは、1 バイトずつで表しているから。上位 × 256 + 下位 で戻す。</figcaption>
+</figure>
+
+<h2>IPv6 では EPSV</h2>
+<p><code>PASV</code> の応答形式は IPv4 アドレスを 4 つの数字で書く前提なので、IPv6 では使えない。代わりに <code>EPSV</code> を使い、応答はポート番号だけを返す（<code>229 Entering Extended Passive Mode (|||52397|)</code>）。</p>
+
+<h2>参考</h2>
+<ul>
+<li><a href="https://datatracker.ietf.org/doc/html/rfc959">RFC 959 — File Transfer Protocol</a></li>
+<li><a href="https://datatracker.ietf.org/doc/html/rfc2428">RFC 2428 — FTP Extensions for IPv6 and NATs</a></li>
+</ul>
+
+</main>
+</body>
+</html>

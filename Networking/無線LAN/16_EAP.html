@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EAP</title>
+<style>
+:root{
+  --bg:#fbfaf8; --card:#fff; --ink:#23201d; --muted:#6b645c; --line:#e3ded6;
+  --lane:#eeeae4; --warn-bg:#fdf3f1; --warn-line:#e0b4ac;
+  --c1:#3d6b9c; --c2:#b8562f; --c3:#5f8248; --c4:#7a63a0; --stop:#c2453a; --on:#fff;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#17161a; --card:#1e1d22; --ink:#e8e4dd; --muted:#9d968c; --line:#34323a;
+    --lane:#2a2830; --warn-bg:#2a1e1d; --warn-line:#6b3b35;
+    --c1:#5c8cc0; --c2:#cf6c42; --c3:#77a05c; --c4:#9680bd; --stop:#d75b4f; --on:#15141a;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:2.5rem 1.25rem 5rem;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  line-height:1.85;font-size:16px;
+}
+main{max-width:52rem;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.35;margin:0 0 .4rem}
+.lede{color:var(--muted);margin:0 0 2.5rem;font-size:1.02rem}
+h2{font-size:1.25rem;margin:3rem 0 .6rem;padding-top:1.4rem;border-top:1px solid var(--line)}
+h3{font-size:1.02rem;margin:1.8rem 0 .4rem}
+p{margin:.7rem 0}
+figure{margin:1.4rem 0;padding:1.1rem 1.1rem .8rem;background:var(--card);border:1px solid var(--line);border-radius:10px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
+.note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:.9rem 1.1rem;margin:1.4rem 0}
+.note strong{color:var(--stop)}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.93rem}
+th,td{border:1px solid var(--line);padding:.5rem .7rem;text-align:left;vertical-align:top}
+th{background:var(--lane);font-weight:600}
+code{background:var(--lane);padding:.1em .4em;border-radius:4px;font-size:.9em}
+ul{padding-left:1.3rem}li{margin:.35rem 0}
+a{color:var(--c1)}
+</style>
+</head>
+<body>
+<main>
+
+<h1>EAP</h1>
+<p class="lede">認証方式そのものではなく、いろいろな認証方式を運ぶための「入れ物」。</p>
+<h2>認証のやり方は 1 つに決められない</h2>
+<p>パスワードで確認したい組織もあれば、証明書を配りたい組織も、ワンタイムパスワードのトークンを使う組織もある。新しい方式もこれから出てくる。<strong>認証方式を 1 つに決め打ちすると、そのたびに規格ごと作り直しになる</strong>。</p>
+<p>EAP はここを分離した。EAP 自身は「認証を始める」「問いかける」「答える」「成功／失敗」といった<strong>やりとりの枠組みだけ</strong>を決め、中身の認証方式は差し替えられるようにしてある。だから <strong>EAP-TLS、PEAP のように「EAP-◯◯」という名前の方式が並ぶ</strong>。</p>
+
+<figure>
+<svg viewBox="0 0 700 196" role="img" aria-label="EAPは認証方式を差し替えられる入れ物">
+  <rect x="0" y="20" width="700" height="132" rx="10" fill="var(--card)" stroke="var(--c1)"/>
+  <text x="350" y="44" font-size="12" font-weight="600" fill="var(--c1)" text-anchor="middle">EAP（やりとりの枠組み：要求 → 応答 → 成功／失敗）</text>
+
+  <text x="350" y="70" font-size="10.5" fill="var(--muted)" text-anchor="middle">この中に、実際の認証方式を入れて運ぶ ↓</text>
+
+  <rect x="24" y="84" width="150" height="50" rx="7" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="99" y="105" font-size="10.5" fill="var(--ink)" text-anchor="middle">証明書で確認</text>
+  <text x="99" y="123" font-size="10" fill="var(--muted)" text-anchor="middle">EAP-TLS</text>
+
+  <rect x="190" y="84" width="150" height="50" rx="7" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="265" y="105" font-size="10.5" fill="var(--ink)" text-anchor="middle">ID とパスワード</text>
+  <text x="265" y="123" font-size="10" fill="var(--muted)" text-anchor="middle">PEAP / EAP-TTLS</text>
+
+  <rect x="356" y="84" width="150" height="50" rx="7" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="431" y="105" font-size="10.5" fill="var(--ink)" text-anchor="middle">ワンタイムパスワード</text>
+  <text x="431" y="123" font-size="10" fill="var(--muted)" text-anchor="middle">EAP-POTP</text>
+
+  <rect x="522" y="84" width="154" height="50" rx="7" fill="var(--card)" stroke="var(--line)" stroke-dasharray="4 3"/>
+  <text x="599" y="105" font-size="10.5" fill="var(--muted)" text-anchor="middle">今後増える方式</text>
+  <text x="599" y="123" font-size="10" fill="var(--muted)" text-anchor="middle">枠組みは変えずに追加できる</text>
+
+  <text x="350" y="178" font-size="10.5" fill="var(--muted)" text-anchor="middle">無線 LAN では EAPOL に載って端末〜AP 間を、RADIUS に載って AP〜認証サーバ間を運ばれる</text>
+</svg>
+<figcaption>入口の AP やスイッチは中身の方式を理解する必要がない。ただ取り次ぐだけなので、方式を変えても入れ替え不要——この分離が EAP の狙い。</figcaption>
+</figure>
+
+<h2>参考</h2>
+<ul>
+<li><a href="https://datatracker.ietf.org/doc/html/rfc3748">RFC 3748 — Extensible Authentication Protocol (EAP)</a></li>
+</ul>
+
+</main>
+</body>
+</html>

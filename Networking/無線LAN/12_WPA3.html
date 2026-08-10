@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WPA3</title>
+<style>
+:root{
+  --bg:#fbfaf8; --card:#fff; --ink:#23201d; --muted:#6b645c; --line:#e3ded6;
+  --lane:#eeeae4; --warn-bg:#fdf3f1; --warn-line:#e0b4ac;
+  --c1:#3d6b9c; --c2:#b8562f; --c3:#5f8248; --c4:#7a63a0; --stop:#c2453a; --on:#fff;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#17161a; --card:#1e1d22; --ink:#e8e4dd; --muted:#9d968c; --line:#34323a;
+    --lane:#2a2830; --warn-bg:#2a1e1d; --warn-line:#6b3b35;
+    --c1:#5c8cc0; --c2:#cf6c42; --c3:#77a05c; --c4:#9680bd; --stop:#d75b4f; --on:#15141a;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:2.5rem 1.25rem 5rem;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  line-height:1.85;font-size:16px;
+}
+main{max-width:52rem;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.35;margin:0 0 .4rem}
+.lede{color:var(--muted);margin:0 0 2.5rem;font-size:1.02rem}
+h2{font-size:1.25rem;margin:3rem 0 .6rem;padding-top:1.4rem;border-top:1px solid var(--line)}
+h3{font-size:1.02rem;margin:1.8rem 0 .4rem}
+p{margin:.7rem 0}
+figure{margin:1.4rem 0;padding:1.1rem 1.1rem .8rem;background:var(--card);border:1px solid var(--line);border-radius:10px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
+.note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:.9rem 1.1rem;margin:1.4rem 0}
+.note strong{color:var(--stop)}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.93rem}
+th,td{border:1px solid var(--line);padding:.5rem .7rem;text-align:left;vertical-align:top}
+th{background:var(--lane);font-weight:600}
+code{background:var(--lane);padding:.1em .4em;border-radius:4px;font-size:.9em}
+ul{padding-left:1.3rem}li{margin:.35rem 0}
+a{color:var(--c1)}
+</style>
+</head>
+<body>
+<main>
+
+<h1>WPA3</h1>
+<p class="lede">WPA2 の弱点は「短い合言葉」。それが弱いままでも破られないように作り直した世代。</p>
+<h2>録音して、あとからゆっくり試される</h2>
+<p>WPA2 のパーソナルモードでは、端末が接続する瞬間のやりとり（4 ウェイハンドシェイク）を電波から拾えば、あとは<strong>手元のマシンで合言葉を片っ端から試せる</strong>。ネットワークに何度も接続を試みる必要がないので、失敗回数の制限も効かない。合言葉が短いと現実的な時間で当てられる。</p>
+<p>WPA3 のパーソナルモードは <strong>SAE</strong> という鍵交換に変えて、ここを塞いだ。<strong>やりとりを録音しても、そこから合言葉を試すことができない</strong>形になっている。</p>
+
+<figure>
+<svg viewBox="0 0 700 218" role="img" aria-label="WPA2とWPA3でのオフライン総当たりの成否">
+  <defs>
+    <marker id="w3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--stop)"/></marker>
+    <marker id="w4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c3)"/></marker>
+  </defs>
+  <text x="0" y="14" font-size="11.5" font-weight="600" fill="var(--stop)">WPA2 パーソナル</text>
+  <rect x="0" y="24" width="180" height="46" rx="7" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="90" y="43" font-size="10.5" fill="var(--ink)" text-anchor="middle">接続時のやりとりを</text>
+  <text x="90" y="60" font-size="10.5" fill="var(--ink)" text-anchor="middle">電波から拾う</text>
+  <line x1="186" y1="47" x2="264" y2="47" stroke="var(--stop)" stroke-width="1.5" marker-end="url(#w3)"/>
+  <rect x="270" y="24" width="200" height="46" rx="7" fill="var(--warn-bg)" stroke="var(--warn-line)"/>
+  <text x="370" y="43" font-size="10.5" fill="var(--stop)" text-anchor="middle">手元のマシンで</text>
+  <text x="370" y="60" font-size="10.5" fill="var(--stop)" text-anchor="middle">合言葉を片っ端から試す</text>
+  <line x1="476" y1="47" x2="554" y2="47" stroke="var(--stop)" stroke-width="1.5" marker-end="url(#w3)"/>
+  <rect x="560" y="24" width="140" height="46" rx="7" fill="var(--warn-bg)" stroke="var(--warn-line)"/>
+  <text x="630" y="52" font-size="11" font-weight="600" fill="var(--stop)" text-anchor="middle">短ければ当たる</text>
+
+  <line x1="0" y1="96" x2="700" y2="96" stroke="var(--line)"/>
+
+  <text x="0" y="122" font-size="11.5" font-weight="600" fill="var(--c3)">WPA3 パーソナル（SAE）</text>
+  <rect x="0" y="132" width="180" height="46" rx="7" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="90" y="160" font-size="10.5" fill="var(--ink)" text-anchor="middle">同じように拾う</text>
+  <line x1="186" y1="155" x2="264" y2="155" stroke="var(--c3)" stroke-width="1.5" marker-end="url(#w4)"/>
+  <rect x="270" y="132" width="200" height="46" rx="7" fill="var(--card)" stroke="var(--c3)"/>
+  <text x="370" y="151" font-size="10.5" fill="var(--c3)" text-anchor="middle">拾った内容からは</text>
+  <text x="370" y="168" font-size="10.5" fill="var(--c3)" text-anchor="middle">合言葉を試せない</text>
+  <line x1="476" y1="155" x2="554" y2="155" stroke="var(--c3)" stroke-width="1.5" marker-end="url(#w4)"/>
+  <rect x="560" y="132" width="140" height="46" rx="7" fill="var(--card)" stroke="var(--c3)"/>
+  <text x="630" y="152" font-size="11" font-weight="600" fill="var(--c3)" text-anchor="middle">AP に毎回</text>
+  <text x="630" y="169" font-size="11" font-weight="600" fill="var(--c3)" text-anchor="middle">挑むしかない</text>
+
+  <text x="350" y="204" font-size="10.5" fill="var(--muted)" text-anchor="middle">さらに、合言葉が後で漏れても過去に録音された通信は復号できない（前方秘匿）</text>
+</svg>
+<figcaption>エンタープライズ向けにはより強い暗号を揃えた 192 ビットモードもある。移行期の機器は WPA2 と WPA3 の両対応で動く設定（移行モード）を持つが、その間は WPA2 側の弱点も残る。</figcaption>
+</figure>
+
+<h2>参考</h2>
+<ul>
+<li><a href="https://www.wi-fi.org/discover-wi-fi/security">Wi-Fi Alliance — Security</a></li>
+<li><a href="https://www.wi-fi.org/system/files/WPA3%20Specification%20v3.5.pdf">Wi-Fi Alliance — WPA3 Specification</a></li>
+</ul>
+
+</main>
+</body>
+</html>

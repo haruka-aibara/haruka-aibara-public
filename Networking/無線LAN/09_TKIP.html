@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TKIP</title>
+<style>
+:root{
+  --bg:#fbfaf8; --card:#fff; --ink:#23201d; --muted:#6b645c; --line:#e3ded6;
+  --lane:#eeeae4; --warn-bg:#fdf3f1; --warn-line:#e0b4ac;
+  --c1:#3d6b9c; --c2:#b8562f; --c3:#5f8248; --c4:#7a63a0; --stop:#c2453a; --on:#fff;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#17161a; --card:#1e1d22; --ink:#e8e4dd; --muted:#9d968c; --line:#34323a;
+    --lane:#2a2830; --warn-bg:#2a1e1d; --warn-line:#6b3b35;
+    --c1:#5c8cc0; --c2:#cf6c42; --c3:#77a05c; --c4:#9680bd; --stop:#d75b4f; --on:#15141a;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:2.5rem 1.25rem 5rem;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  line-height:1.85;font-size:16px;
+}
+main{max-width:52rem;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.35;margin:0 0 .4rem}
+.lede{color:var(--muted);margin:0 0 2.5rem;font-size:1.02rem}
+h2{font-size:1.25rem;margin:3rem 0 .6rem;padding-top:1.4rem;border-top:1px solid var(--line)}
+h3{font-size:1.02rem;margin:1.8rem 0 .4rem}
+p{margin:.7rem 0}
+figure{margin:1.4rem 0;padding:1.1rem 1.1rem .8rem;background:var(--card);border:1px solid var(--line);border-radius:10px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
+.note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:.9rem 1.1rem;margin:1.4rem 0}
+.note strong{color:var(--stop)}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.93rem}
+th,td{border:1px solid var(--line);padding:.5rem .7rem;text-align:left;vertical-align:top}
+th{background:var(--lane);font-weight:600}
+code{background:var(--lane);padding:.1em .4em;border-radius:4px;font-size:.9em}
+ul{padding-left:1.3rem}li{margin:.35rem 0}
+a{color:var(--c1)}
+</style>
+</head>
+<body>
+<main>
+
+<h1>TKIP</h1>
+<p class="lede">WEP の壊れ方を、同じハードウェアのまま塞ぐための応急処置。</p>
+<h2>ハードは変えられない、という制約から生まれた</h2>
+<p>WEP の欠陥は「合言葉が固定のまま、短い IV を付けただけで暗号化していた」こと。しかし当時の無線チップは RC4 しか動かせず、AES に変えるには買い替えが必要だった。</p>
+<p>TKIP は RC4 をそのまま使いながら、<strong>鍵の作り方だけを直した</strong>。IV を 48 ビットに広げ、<strong>パケットごとに違う鍵を組み立てて</strong>使い、さらに改ざん検知（MIC）を追加した。ファームウェア更新だけで適用できたので、WEP 世代の機器が延命できた。</p>
+
+<figure>
+<svg viewBox="0 0 700 180" role="img" aria-label="WEPとTKIPの鍵の使い方の違い">
+  <text x="0" y="14" font-size="11.5" font-weight="600" fill="var(--stop)">WEP</text>
+  <rect x="0" y="24" width="180" height="40" rx="6" fill="var(--warn-bg)" stroke="var(--warn-line)"/>
+  <text x="90" y="49" font-size="10.5" fill="var(--stop)" text-anchor="middle">合言葉（ずっと同じ）</text>
+  <rect x="196" y="24" width="130" height="40" rx="6" fill="var(--warn-bg)" stroke="var(--warn-line)"/>
+  <text x="261" y="49" font-size="10.5" fill="var(--stop)" text-anchor="middle">24 ビットの IV</text>
+  <rect x="342" y="24" width="358" height="40" rx="6" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="521" y="49" font-size="10.5" fill="var(--muted)" text-anchor="middle">これをそのまま鍵にして RC4 で暗号化</text>
+
+  <line x1="0" y1="86" x2="700" y2="86" stroke="var(--line)"/>
+
+  <text x="0" y="112" font-size="11.5" font-weight="600" fill="var(--c2)">TKIP</text>
+  <rect x="0" y="122" width="180" height="40" rx="6" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="90" y="147" font-size="10.5" fill="var(--ink)" text-anchor="middle">合言葉</text>
+  <rect x="196" y="122" width="130" height="40" rx="6" fill="var(--card)" stroke="var(--c2)"/>
+  <text x="261" y="141" font-size="10.5" fill="var(--c2)" text-anchor="middle">48 ビットの IV</text>
+  <text x="261" y="156" font-size="10" fill="var(--muted)" text-anchor="middle">＋ 端末の MAC</text>
+  <rect x="342" y="122" width="358" height="40" rx="6" fill="var(--card)" stroke="var(--c3)"/>
+  <text x="521" y="141" font-size="10.5" fill="var(--c3)" text-anchor="middle">パケットごとに鍵を作り直して RC4 で暗号化</text>
+  <text x="521" y="156" font-size="10" fill="var(--muted)" text-anchor="middle">＋ 改ざん検知（MIC）を付ける</text>
+</svg>
+<figcaption>暗号そのものは RC4 のまま。あくまで壊れ方を塞いだ延命策で、今は非推奨。TKIP を有効にすると規格上 802.11n 以降の高速通信が使えず、速度も落ちる。</figcaption>
+</figure>
+
+<h2>参考</h2>
+<ul>
+<li><a href="https://www.wi-fi.org/discover-wi-fi/security">Wi-Fi Alliance — Security</a></li>
+</ul>
+
+</main>
+</body>
+</html>
