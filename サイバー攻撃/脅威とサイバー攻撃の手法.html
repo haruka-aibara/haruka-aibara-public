@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>脅威とサイバー攻撃の手法を図で理解する</title>
+<style>
+:root{
+  --bg:#fbfaf8; --card:#fff; --ink:#23201d; --muted:#6b645c; --line:#e3ded6;
+  --lane:#eeeae4; --warn-bg:#fdf3f1; --warn-line:#e0b4ac;
+  --c1:#3d6b9c; --c2:#b8562f; --c3:#5f8248; --c4:#7a63a0; --stop:#c2453a; --on:#fff;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#17161a; --card:#1e1d22; --ink:#e8e4dd; --muted:#9d968c; --line:#34323a;
+    --lane:#2a2830; --warn-bg:#2a1e1d; --warn-line:#6b3b35;
+    --c1:#5c8cc0; --c2:#cf6c42; --c3:#77a05c; --c4:#9680bd; --stop:#d75b4f; --on:#15141a;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:2.5rem 1.25rem 5rem;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  line-height:1.85;font-size:16px;
+}
+main{max-width:52rem;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.35;margin:0 0 .4rem}
+.lede{color:var(--muted);margin:0 0 2.5rem;font-size:1.02rem}
+h2{font-size:1.25rem;margin:3rem 0 .6rem;padding-top:1.4rem;border-top:1px solid var(--line)}
+h3{font-size:1.02rem;margin:1.8rem 0 .4rem}
+p{margin:.7rem 0}
+figure{margin:1.4rem 0;padding:1.1rem 1.1rem .8rem;background:var(--card);border:1px solid var(--line);border-radius:10px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
+.note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:.9rem 1.1rem;margin:1.4rem 0}
+.note strong{color:var(--stop)}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.93rem}
+th,td{border:1px solid var(--line);padding:.5rem .7rem;text-align:left;vertical-align:top}
+th{background:var(--lane);font-weight:600}
+code{background:var(--lane);padding:.1em .4em;border-radius:4px;font-size:.9em}
+ul{padding-left:1.3rem}li{margin:.35rem 0}
+a{color:var(--c1)}
+</style>
+</head>
+<body>
+<main>
+
+<h1>脅威とサイバー攻撃の手法を図で理解する</h1>
+<p class="lede">攻撃者は「調べる → 入る → 盗み見る → なりすます」の順に動く。手法名を並べて覚えるより、この流れのどこで効く話なのかを押さえたほうが早い。</p>
+
+<h2>脆弱性の種類に付く番号：CWE</h2>
+<p>脆弱性の報告を読むと <code>CVE-2024-12345</code> と <code>CWE-89</code> が並んで書かれている。番号が2種類あって紛らわしいが、指しているものが違う。</p>
+<p><strong>CVE は「どの製品の、どの脆弱性か」という個体の識別子</strong>。対して <strong>CWE（Common Weakness Enumeration）は「なぜ起きたか」という弱点の種類の識別子</strong>で、SQL インジェクションなら CWE-89、クロスサイトスクリプティングなら CWE-79 と決まっている。製品が違っても原因が同じなら CWE は同じ番号になる。</p>
+
+<figure>
+<svg viewBox="0 0 700 178" role="img" aria-label="CWEとCVEの関係。1つのCWEの下に複数のCVEがぶら下がる">
+  <rect x="170" y="8" width="360" height="46" rx="8" fill="var(--c1)"/>
+  <text x="350" y="29" font-size="12.5" font-weight="600" fill="var(--on)" text-anchor="middle">CWE-89 — SQL インジェクション</text>
+  <text x="350" y="46" font-size="10.5" fill="var(--on)" opacity=".85" text-anchor="middle">弱点の「種類」。製品に依存しない</text>
+
+  <path d="M350 54 L350 76 L116 76 L116 96" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+  <path d="M350 54 L350 96" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+  <path d="M350 54 L350 76 L584 76 L584 96" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+
+  <g font-size="11">
+    <rect x="16" y="96" width="200" height="46" rx="7" fill="var(--lane)" stroke="var(--line)"/>
+    <text x="116" y="116" fill="var(--ink)" text-anchor="middle">CVE-2023-xxxxx</text>
+    <text x="116" y="132" fill="var(--muted)" text-anchor="middle" font-size="10.5">製品 A の検索画面</text>
+
+    <rect x="250" y="96" width="200" height="46" rx="7" fill="var(--lane)" stroke="var(--line)"/>
+    <text x="350" y="116" fill="var(--ink)" text-anchor="middle">CVE-2024-xxxxx</text>
+    <text x="350" y="132" fill="var(--muted)" text-anchor="middle" font-size="10.5">製品 B のログイン画面</text>
+
+    <rect x="484" y="96" width="200" height="46" rx="7" fill="var(--lane)" stroke="var(--line)"/>
+    <text x="584" y="116" fill="var(--ink)" text-anchor="middle">CVE-2025-xxxxx</text>
+    <text x="584" y="132" fill="var(--muted)" text-anchor="middle" font-size="10.5">製品 C の管理 API</text>
+  </g>
+  <text x="350" y="166" font-size="11" fill="var(--muted)" text-anchor="middle">CVE = 個別の脆弱性（対応する対象）　／　CWE = 原因の分類（再発を止める単位）</text>
+</svg>
+<figcaption>CVE は「この製品を直す」ための番号、CWE は「同じ作り方をやめる」ための番号。開発チームに再発防止を伝えるときは CVE ではなく CWE で話すと、修正が1件で終わらずコーディング規約やレビュー観点に落ちる。よく出る弱点をまとめた CWE Top 25 は、レビュー項目のたたき台として使える。</figcaption>
+</figure>
+
+<h2>まず調べられる：ポートスキャン</h2>
+<p>攻撃はいきなり侵入から始まらない。最初にやられるのは「どのポートが開いていて、何が動いているか」の調査だ。TCP のハンドシェイクの応答の違いを利用して、開いているポートを外から判別する。</p>
+
+<figure>
+<svg viewBox="0 0 700 320" role="img" aria-label="TCPスキャン・SYNスキャン・FIN/NULLスキャンのパケットのやりとり">
+  <defs>
+    <marker id="mk-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c1)"/></marker>
+    <marker id="mk-c3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c3)"/></marker>
+    <marker id="mk-stop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--stop)"/></marker>
+  </defs>
+
+  <g>
+    <text x="0" y="12" font-size="12.5" font-weight="600" fill="var(--ink)">① TCP（コネクト）スキャン — 開いているポート</text>
+    <text x="50" y="32" font-size="10.5" fill="var(--muted)" text-anchor="middle">攻撃者</text>
+    <text x="285" y="32" font-size="10.5" fill="var(--muted)" text-anchor="middle">対象</text>
+    <line x1="50" y1="38" x2="50" y2="128" stroke="var(--line)" stroke-width="1.5"/>
+    <line x1="285" y1="38" x2="285" y2="128" stroke="var(--line)" stroke-width="1.5"/>
+    <line x1="52" y1="56" x2="279" y2="56" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#mk-ink)"/>
+    <text x="166" y="51" font-size="10.5" fill="var(--muted)" text-anchor="middle">SYN</text>
+    <line x1="283" y1="80" x2="56" y2="80" stroke="var(--c3)" stroke-width="1.5" marker-end="url(#mk-c3)"/>
+    <text x="166" y="75" font-size="10.5" fill="var(--muted)" text-anchor="middle">SYN/ACK</text>
+    <line x1="52" y1="104" x2="279" y2="104" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#mk-ink)"/>
+    <text x="166" y="99" font-size="10.5" fill="var(--muted)" text-anchor="middle">ACK（接続成立）</text>
+    <text x="0" y="146" font-size="11" fill="var(--stop)">接続が成立するのでサーバ側のログに残る</text>
+  </g>
+
+  <g transform="translate(370,0)">
+    <text x="0" y="12" font-size="12.5" font-weight="600" fill="var(--ink)">② SYN スキャン — 開いているポート</text>
+    <text x="50" y="32" font-size="10.5" fill="var(--muted)" text-anchor="middle">攻撃者</text>
+    <text x="285" y="32" font-size="10.5" fill="var(--muted)" text-anchor="middle">対象</text>
+    <line x1="50" y1="38" x2="50" y2="128" stroke="var(--line)" stroke-width="1.5"/>
+    <line x1="285" y1="38" x2="285" y2="128" stroke="var(--line)" stroke-width="1.5"/>
+    <line x1="52" y1="56" x2="279" y2="56" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#mk-ink)"/>
+    <text x="166" y="51" font-size="10.5" fill="var(--muted)" text-anchor="middle">SYN</text>
+    <line x1="283" y1="80" x2="56" y2="80" stroke="var(--c3)" stroke-width="1.5" marker-end="url(#mk-c3)"/>
+    <text x="166" y="75" font-size="10.5" fill="var(--muted)" text-anchor="middle">SYN/ACK（＝開いている）</text>
+    <line x1="52" y1="104" x2="279" y2="104" stroke="var(--c2)" stroke-width="1.5" marker-end="url(#mk-ink)"/>
+    <text x="166" y="99" font-size="10.5" fill="var(--muted)" text-anchor="middle">RST（成立させず打ち切る）</text>
+    <text x="0" y="146" font-size="11" fill="var(--c3)">接続が成立しないためアプリのログに残りにくい</text>
+  </g>
+
+  <line x1="0" y1="172" x2="700" y2="172" stroke="var(--line)"/>
+
+  <g transform="translate(0,182)">
+    <text x="0" y="12" font-size="12.5" font-weight="600" fill="var(--ink)">③ FIN / NULL スキャン — 開いているポート</text>
+    <text x="50" y="32" font-size="10.5" fill="var(--muted)" text-anchor="middle">攻撃者</text>
+    <text x="285" y="32" font-size="10.5" fill="var(--muted)" text-anchor="middle">対象</text>
+    <line x1="50" y1="38" x2="50" y2="112" stroke="var(--line)" stroke-width="1.5"/>
+    <line x1="285" y1="38" x2="285" y2="112" stroke="var(--line)" stroke-width="1.5"/>
+    <line x1="52" y1="60" x2="279" y2="60" stroke="var(--c4)" stroke-width="1.5" marker-end="url(#mk-ink)"/>
+    <text x="166" y="55" font-size="10.5" fill="var(--muted)" text-anchor="middle">FIN だけ／フラグ全部 0</text>
+    <line x1="283" y1="88" x2="56" y2="88" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <text x="166" y="83" font-size="10.5" fill="var(--muted)" text-anchor="middle">応答なし</text>
+    <text x="0" y="128" font-size="11" fill="var(--c1)">「無反応 ＝ 開いている」と読む</text>
+  </g>
+
+  <g transform="translate(370,182)">
+    <text x="0" y="12" font-size="12.5" font-weight="600" fill="var(--ink)">③' FIN / NULL スキャン — 閉じているポート</text>
+    <text x="50" y="32" font-size="10.5" fill="var(--muted)" text-anchor="middle">攻撃者</text>
+    <text x="285" y="32" font-size="10.5" fill="var(--muted)" text-anchor="middle">対象</text>
+    <line x1="50" y1="38" x2="50" y2="112" stroke="var(--line)" stroke-width="1.5"/>
+    <line x1="285" y1="38" x2="285" y2="112" stroke="var(--line)" stroke-width="1.5"/>
+    <line x1="52" y1="60" x2="279" y2="60" stroke="var(--c4)" stroke-width="1.5" marker-end="url(#mk-ink)"/>
+    <text x="166" y="55" font-size="10.5" fill="var(--muted)" text-anchor="middle">FIN だけ／フラグ全部 0</text>
+    <line x1="283" y1="88" x2="56" y2="88" stroke="var(--stop)" stroke-width="1.5" marker-end="url(#mk-stop)"/>
+    <text x="166" y="83" font-size="10.5" fill="var(--muted)" text-anchor="middle">RST</text>
+    <text x="0" y="128" font-size="11" fill="var(--muted)">RST が返る ＝ 閉じている</text>
+  </g>
+</svg>
+<figcaption>①は OS の通常の接続機能をそのまま使うので特別な権限が要らない。②③は TCP ヘッダを自分で組み立てて送るため管理者権限が必要になる。逆に言えば、権限のないユーザーが実行できるのは事実上①だけ。</figcaption>
+</figure>
+
+<table>
+<tr><th>種類</th><th>送るもの</th><th>開いている</th><th>閉じている</th><th>特徴</th></tr>
+<tr><td>TCP（コネクト）</td><td>3ウェイハンドシェイクを完走</td><td>接続成立</td><td>RST</td><td>結果は確実。接続ログに残る</td></tr>
+<tr><td>SYN（ステルス／ハーフオープン）</td><td>SYN のみ。応答が来たら RST で打ち切る</td><td>SYN/ACK</td><td>RST</td><td>成立させないのでログに残りにくい</td></tr>
+<tr><td>FIN</td><td>FIN フラグだけ</td><td>応答なし</td><td>RST</td><td>「応答なし＝開」と逆読みする</td></tr>
+<tr><td>NULL</td><td>フラグを全部 0</td><td>応答なし</td><td>RST</td><td>同上</td></tr>
+</table>
+
+<div class="note">
+<p><strong>FIN / NULL は相手の OS 次第で当てにならない。</strong>「開いているポートは無反応」は TCP の仕様どおりに実装した OS の挙動で、Windows など一部の OS は開いていても RST を返す。この場合スキャン結果は全ポート閉に見える。逆にこの反応の違いは、相手 OS の推測材料にもなる。</p>
+</div>
+
+<h2>開いていること自体を隠す：ポートノッキングと SPA</h2>
+<p>SSH をインターネットに晒すと、スキャンされて総当たりログインが延々と来る。IP 制限をかけたいが、接続元が固定できない場面がある。そこで「普段はポートを閉じておき、正しい合図を出した相手にだけ開ける」やり方が出てくる。</p>
+
+<figure>
+<svg viewBox="0 0 700 236" role="img" aria-label="ポートノッキングとSPAの比較">
+  <defs>
+    <marker id="mk3-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c1)"/></marker>
+  </defs>
+  <g>
+    <text x="0" y="12" font-size="12.5" font-weight="600" fill="var(--ink)">ポートノッキング — 決められた順番でポートを叩く</text>
+    <rect x="0" y="26" width="66" height="30" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+    <text x="33" y="46" font-size="10.5" fill="var(--ink)" text-anchor="middle">利用者</text>
+    <rect x="72" y="26" width="52" height="30" rx="5" fill="var(--c1)"/>
+    <text x="98" y="46" font-size="10.5" fill="var(--on)" text-anchor="middle">7000</text>
+    <rect x="130" y="26" width="52" height="30" rx="5" fill="var(--c1)"/>
+    <text x="156" y="46" font-size="10.5" fill="var(--on)" text-anchor="middle">8000</text>
+    <rect x="188" y="26" width="52" height="30" rx="5" fill="var(--c1)"/>
+    <text x="214" y="46" font-size="10.5" fill="var(--on)" text-anchor="middle">9000</text>
+    <line x1="244" y1="41" x2="272" y2="41" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#mk3-ink)"/>
+    <rect x="278" y="26" width="200" height="30" rx="5" fill="var(--c3)"/>
+    <text x="378" y="46" font-size="10.5" fill="var(--on)" text-anchor="middle">FW が 22 番をこの IP にだけ開く</text>
+
+    <rect x="72" y="76" width="406" height="44" rx="7" fill="var(--warn-bg)" stroke="var(--warn-line)"/>
+    <text x="88" y="95" font-size="11" fill="var(--stop)">盗聴者：叩いた順番はそのまま平文で見える</text>
+    <text x="88" y="112" font-size="11" fill="var(--muted)">→ 同じ順番を再生（リプレイ）すれば自分も開けられる</text>
+  </g>
+
+  <line x1="0" y1="140" x2="700" y2="140" stroke="var(--line)"/>
+
+  <g transform="translate(0,150)">
+    <text x="0" y="12" font-size="12.5" font-weight="600" fill="var(--ink)">SPA（Single Packet Authorization）— 1パケットで認証する</text>
+    <rect x="0" y="26" width="66" height="30" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+    <text x="33" y="46" font-size="10.5" fill="var(--ink)" text-anchor="middle">利用者</text>
+    <rect x="72" y="26" width="168" height="30" rx="5" fill="var(--c4)"/>
+    <text x="156" y="45" font-size="10" fill="var(--on)" text-anchor="middle">暗号化 + HMAC + 時刻</text>
+    <line x1="244" y1="41" x2="272" y2="41" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#mk3-ink)"/>
+    <rect x="278" y="26" width="200" height="30" rx="5" fill="var(--c3)"/>
+    <text x="378" y="46" font-size="10.5" fill="var(--on)" text-anchor="middle">FW が 22 番をこの IP にだけ開く</text>
+    <text x="72" y="76" font-size="11" fill="var(--c3)">盗聴者：中身は読めず、録って送り直しても時刻・使用済み判定で弾かれる</text>
+  </g>
+</svg>
+<figcaption>どちらも FW の既定を「全部 drop」にしたうえで穴を開ける仕組みで、SSH 自体の認証を置き換えるものではない（多層防御の1枚）。実装では fwknop が代表的で、ポートノッキングのモードも持つが非推奨扱いになっている。運用上の弱点は、合図を出す側にも専用クライアントと鍵が要ること。</figcaption>
+</figure>
+
+<h2>侵入後にコードを実行させない：SSP・DEP・ASLR</h2>
+<p>バッファオーバーフローの狙いは「用意した領域からはみ出して書き込み、関数のリターンアドレスを自分のコードの番地に書き換える」こと。これに対する防御は1つではなく、成立条件を1つずつ潰す形で積み重なっている。</p>
+
+<figure>
+<svg viewBox="0 -6 700 232" role="img" aria-label="スタックの構造と4つの防御機構が効く場所">
+  <defs>
+    <marker id="mk4-stop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--stop)"/></marker>
+  </defs>
+  <text x="0" y="12" font-size="12.5" font-weight="600" fill="var(--ink)">関数のスタックフレーム</text>
+  <text x="300" y="12" font-size="11" fill="var(--muted)">高位アドレス ↑</text>
+
+  <rect x="0" y="24" width="290" height="34" rx="5" fill="var(--c2)"/>
+  <text x="145" y="46" font-size="11" fill="var(--on)" text-anchor="middle">リターンアドレス（戻り先の番地）</text>
+  <rect x="0" y="62" width="290" height="30" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="145" y="82" font-size="11" fill="var(--muted)" text-anchor="middle">保存されたフレームポインタ</text>
+  <rect x="0" y="96" width="290" height="30" rx="5" fill="var(--c4)"/>
+  <text x="145" y="116" font-size="11" fill="var(--on)" text-anchor="middle">カナリア（見張り用の値）</text>
+  <rect x="0" y="130" width="290" height="60" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="145" y="155" font-size="11" fill="var(--ink)" text-anchor="middle">ローカル変数 buf[64]</text>
+  <text x="145" y="175" font-size="10.5" fill="var(--muted)" text-anchor="middle">ここに 64 バイトを超えて書き込むと…</text>
+  <path d="M305 180 L305 40" fill="none" stroke="var(--stop)" stroke-width="1.5" marker-end="url(#mk4-stop)"/>
+  <text x="320" y="120" font-size="10.5" fill="var(--stop)" text-anchor="middle" transform="rotate(-90 320 120)">あふれた分が上へ伸びる</text>
+  <text x="0" y="210" font-size="11" fill="var(--muted)">低位アドレス ↓</text>
+
+  <g font-size="11">
+    <rect x="358" y="24" width="342" height="34" rx="6" fill="none" stroke="var(--c2)" stroke-width="1.5"/>
+    <text x="372" y="38" fill="var(--ink)" font-weight="600">ASLR</text>
+    <text x="372" y="52" fill="var(--muted)">番地が起動ごとに変わる → 書き換える先が分からない</text>
+
+    <rect x="358" y="96" width="342" height="34" rx="6" fill="none" stroke="var(--c4)" stroke-width="1.5"/>
+    <text x="372" y="110" fill="var(--ink)" font-weight="600">SSP（スタックカナリア）</text>
+    <text x="372" y="124" fill="var(--muted)">関数から戻る直前に値を検査 → 壊れていたら異常終了</text>
+
+    <rect x="358" y="138" width="342" height="34" rx="6" fill="none" stroke="var(--c3)" stroke-width="1.5"/>
+    <text x="372" y="152" fill="var(--ink)" font-weight="600">automatic fortification（_FORTIFY_SOURCE）</text>
+    <text x="372" y="166" fill="var(--muted)">コピー関数の呼び出し時点でサイズを検査 → あふれさせない</text>
+
+    <rect x="358" y="180" width="342" height="34" rx="6" fill="none" stroke="var(--c1)" stroke-width="1.5"/>
+    <text x="372" y="194" fill="var(--ink)" font-weight="600">DEP / NX</text>
+    <text x="372" y="208" fill="var(--muted)">データ領域は実行不可 → 送り込んだコードが動かない</text>
+  </g>
+</svg>
+<figcaption>4つは代替関係ではなく、それぞれ別の前提を壊している。攻撃者から見ると、DEP は「既存コードの断片を繋いで目的を果たす」手法（ROP）で迂回されるが、その組み立てには正確な番地が要るので ASLR と組み合わせて初めて効く。「片方だけ有効」では意味が薄い、というのがこの図の要点。</figcaption>
+</figure>
+
+<ul>
+<li><strong>SSP</strong>（Stack Smashing Protector）：GCC の <code>-fstack-protector</code> 系オプション。リターンアドレスの手前に見張り用の値を置き、関数終了時に壊れていないか確認する。</li>
+<li><strong>automatic fortification</strong>：<code>-D_FORTIFY_SOURCE=2</code> でコンパイルすると、<code>strcpy</code> や <code>memcpy</code> がコピー先サイズを検査する版に自動で差し替わる。ソースを書き換えずに境界チェックが入るのでこの名前で呼ばれる。</li>
+<li><strong>DEP</strong>（Data Execution Prevention）：Windows の呼び名。CPU の NX ビットを使い、スタックやヒープのページを実行不可にする。</li>
+<li><strong>ASLR</strong>：実行ファイル・ライブラリ・スタックの配置先を起動のたびにランダム化する。</li>
+</ul>
+<p>いずれもビルド時オプションと OS 設定で決まる。自分たちでコンパイルして配布しているバイナリなら、有効になっているかを確認する価値がある。</p>
+
+<h2>通信を盗み見る：スニファとプロミスキャスモード</h2>
+<p>NIC は本来、自分宛（宛先 MAC が一致するもの）以外のフレームを捨てる。この破棄をやめて全部拾うのが<strong>プロミスキャスモード</strong>で、拾ったパケットを解析するツール（tcpdump や Wireshark）が<strong>スニファ</strong>。障害調査に必須の道具であり、盗聴の道具でもある。</p>
+
+<figure>
+<svg viewBox="0 0 700 224" role="img" aria-label="リピータハブとスイッチでの盗聴可否の違い">
+  <defs>
+    <marker id="mk5-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c1)"/></marker>
+    <marker id="mk5-stop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--stop)"/></marker>
+  </defs>
+  <g>
+    <text x="0" y="12" font-size="12.5" font-weight="600" fill="var(--ink)">リピータハブ — 届いたフレームを全ポートに流す</text>
+    <rect x="90" y="80" width="130" height="34" rx="6" fill="var(--c2)"/>
+    <text x="155" y="102" font-size="11" fill="var(--on)" text-anchor="middle">ハブ</text>
+    <rect x="0" y="30" width="80" height="28" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+    <text x="40" y="49" font-size="10.5" fill="var(--ink)" text-anchor="middle">PC-A</text>
+    <rect x="230" y="30" width="80" height="28" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+    <text x="270" y="49" font-size="10.5" fill="var(--ink)" text-anchor="middle">PC-B</text>
+    <rect x="90" y="150" width="130" height="42" rx="5" fill="var(--warn-bg)" stroke="var(--warn-line)"/>
+    <text x="155" y="167" font-size="10.5" fill="var(--stop)" text-anchor="middle">攻撃者</text>
+    <text x="155" y="183" font-size="10" fill="var(--muted)" text-anchor="middle">プロミスキャスモード</text>
+    <line x1="40" y1="58" x2="105" y2="78" stroke="var(--c1)" stroke-width="1.5"/>
+    <line x1="205" y1="78" x2="266" y2="58" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#mk5-ink)"/>
+    <line x1="155" y1="114" x2="155" y2="146" stroke="var(--stop)" stroke-width="1.5" marker-end="url(#mk5-stop)"/>
+    <text x="0" y="212" font-size="11" fill="var(--stop)">A→B の通信のコピーがそのまま攻撃者にも届く</text>
+  </g>
+
+  <line x1="380" y1="20" x2="380" y2="200" stroke="var(--line)"/>
+
+  <g transform="translate(390,0)">
+    <text x="0" y="12" font-size="12.5" font-weight="600" fill="var(--ink)">スイッチ — 宛先のポートにだけ送る</text>
+    <rect x="90" y="80" width="130" height="34" rx="6" fill="var(--c3)"/>
+    <text x="155" y="102" font-size="11" fill="var(--on)" text-anchor="middle">スイッチ</text>
+    <rect x="0" y="30" width="80" height="28" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+    <text x="40" y="49" font-size="10.5" fill="var(--ink)" text-anchor="middle">PC-A</text>
+    <rect x="230" y="30" width="80" height="28" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+    <text x="270" y="49" font-size="10.5" fill="var(--ink)" text-anchor="middle">PC-B</text>
+    <rect x="90" y="150" width="130" height="42" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+    <text x="155" y="167" font-size="10.5" fill="var(--muted)" text-anchor="middle">攻撃者</text>
+    <text x="155" y="183" font-size="10" fill="var(--muted)" text-anchor="middle">何も届かない</text>
+    <text x="0" y="212" font-size="11" fill="var(--c3)">盗聴には ARP スプーフィングなど別の一手が要る</text>
+    <line x1="40" y1="58" x2="105" y2="78" stroke="var(--c1)" stroke-width="1.5"/>
+    <line x1="205" y1="78" x2="266" y2="58" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#mk5-ink)"/>
+    <line x1="155" y1="114" x2="155" y2="146" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <text x="128" y="136" font-size="15" fill="var(--stop)">✕</text>
+  </g>
+</svg>
+<figcaption>スイッチが当たり前になった今、LAN 内でただ NIC をプロミスキャスモードにしても他人の通信は見えない。そのため攻撃者は ARP スプーフィングで通信を自分経由に曲げる、ミラーポートを使う、といった一手間を足す。裏を返せば「盗聴されない」ではなく「盗聴に別の攻撃が必要になる」だけなので、通信自体の暗号化は依然として必要。</figcaption>
+</figure>
+
+<h3>無線 LAN：WEP / WPA / WPA2 と ESSID</h3>
+<p>無線は電波が届く範囲の全員に届くので、有線のスイッチのような分離がそもそも効かない。暗号化方式の世代がそのまま盗聴されるかどうかを決める。</p>
+
+<table>
+<tr><th>方式</th><th>暗号</th><th>状況</th></tr>
+<tr><td>WEP</td><td>RC4 + 24 ビットの IV</td><td>IV の使い回しから鍵を復元できる。通信量さえあれば数分で破れるため使ってはいけない</td></tr>
+<tr><td>WPA</td><td>TKIP（RC4 のまま鍵を都度変える）</td><td>WEP 世代の機器をファーム更新で救うための暫定策。現在は非推奨</td></tr>
+<tr><td>WPA2</td><td>CCMP（AES）</td><td>長く実質標準。ただし個人モードは接続時のやりとりを捕まえるとオフラインで総当たりできるため、パスフレーズを長くする必要がある</td></tr>
+<tr><td>WPA3</td><td>SAE</td><td>パスフレーズが弱くてもオフラインでの総当たりが成立しないよう作り直された世代</td></tr>
+</table>
+
+<p><strong>ESSID</strong> は無線ネットワークの名前。「ESSID ステルス（ビーコンに名前を載せない）にすれば安全」と言われがちだが、対策にはならない。接続済みの端末はその名前を平文で呼びかけながら電波を出すため、待っていれば拾える。MAC アドレスフィルタも同じ理由（MAC は平文で流れる）で回避される。<strong>無線で本当に効くのは暗号化方式の世代と、パスフレーズの長さ</strong>だけだと考えたほうがいい。</p>
+
+<h2>認証を素通りする3つの手口</h2>
+
+<h3>セッションフィクセーション</h3>
+<p>ログイン後の本人確認はセッション ID で行われる。ならば <strong>ID を盗むのではなく、攻撃者が知っている ID を利用者に使わせてしまえばいい</strong>——これがセッションフィクセーション（セッション固定攻撃）。</p>
+
+<figure>
+<svg viewBox="0 0 700 214" role="img" aria-label="セッションフィクセーションの流れ">
+  <defs>
+    <marker id="mk6-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c1)"/></marker>
+    <marker id="mk6-stop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--stop)"/></marker>
+  </defs>
+  <text x="90" y="14" font-size="11" fill="var(--muted)" text-anchor="middle">攻撃者</text>
+  <text x="350" y="14" font-size="11" fill="var(--muted)" text-anchor="middle">利用者</text>
+  <text x="610" y="14" font-size="11" fill="var(--muted)" text-anchor="middle">サイト</text>
+  <line x1="90" y1="22" x2="90" y2="190" stroke="var(--line)" stroke-width="1.5"/>
+  <line x1="350" y1="22" x2="350" y2="190" stroke="var(--line)" stroke-width="1.5"/>
+  <line x1="610" y1="22" x2="610" y2="190" stroke="var(--line)" stroke-width="1.5"/>
+
+  <line x1="92" y1="48" x2="604" y2="48" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#mk6-ink)"/>
+  <text x="350" y="43" font-size="11" fill="var(--ink)" text-anchor="middle">① 先にアクセスして セッション ID=ABC を受け取る</text>
+
+  <line x1="92" y1="88" x2="344" y2="88" stroke="var(--c2)" stroke-width="1.5" marker-end="url(#mk6-ink)"/>
+  <text x="218" y="83" font-size="11" fill="var(--ink)" text-anchor="middle">② ABC を仕込んだリンクを踏ませる</text>
+
+  <line x1="352" y1="128" x2="604" y2="128" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#mk6-ink)"/>
+  <text x="478" y="123" font-size="11" fill="var(--ink)" text-anchor="middle">③ ABC のままログイン成功</text>
+  <text x="478" y="144" font-size="10.5" fill="var(--muted)" text-anchor="middle">→ ABC が「認証済み」になる</text>
+
+  <line x1="92" y1="176" x2="604" y2="176" stroke="var(--stop)" stroke-width="1.5" marker-end="url(#mk6-stop)"/>
+  <text x="350" y="171" font-size="11" fill="var(--stop)" text-anchor="middle">④ 攻撃者が ABC でアクセス ＝ 利用者としてログイン済み</text>
+
+  <rect x="140" y="196" width="420" height="0" fill="none"/>
+</svg>
+<figcaption>③でサイトがセッション ID を新しく発行し直していれば、攻撃者が握っている ABC は認証済みにならず④が成立しない。つまり対策は「ログイン成功時にセッション ID を再発行する」の一点。加えて、URL パラメータで渡された ID をそのまま採用しない（Cookie で扱う）ことで②の仕込み自体を難しくできる。</figcaption>
+</figure>
+
+<h3>pass the hash</h3>
+<p>Windows の NTLM 認証は、パスワードそのものではなく<strong>パスワードのハッシュを鍵として</strong>チャレンジレスポンスを行う。ここが弱点で、端末のメモリからハッシュを抜き出せれば、平文のパスワードを知らないままそのハッシュで他のサーバにログインできてしまう。ハッシュ化は「盗まれても平気」を意味しない、という代表例。</p>
+
+<figure>
+<svg viewBox="0 0 700 168" role="img" aria-label="pass the hash攻撃の仕組み">
+  <defs>
+    <marker id="mk7-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c1)"/></marker>
+    <marker id="mk7-stop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--stop)"/></marker>
+  </defs>
+  <text x="0" y="12" font-size="12.5" font-weight="600" fill="var(--ink)">通常のログイン</text>
+  <rect x="0" y="24" width="140" height="30" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="70" y="44" font-size="10.5" fill="var(--ink)" text-anchor="middle">パスワード入力</text>
+  <line x1="146" y1="39" x2="176" y2="39" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#mk7-ink)"/>
+  <rect x="182" y="24" width="140" height="30" rx="5" fill="var(--c1)"/>
+  <text x="252" y="44" font-size="10.5" fill="var(--on)" text-anchor="middle">ハッシュ化</text>
+  <line x1="328" y1="39" x2="358" y2="39" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#mk7-ink)"/>
+  <rect x="364" y="24" width="336" height="30" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="532" y="44" font-size="10.5" fill="var(--ink)" text-anchor="middle">ハッシュを鍵にチャレンジレスポンス → 認証成功</text>
+
+  <line x1="0" y1="76" x2="700" y2="76" stroke="var(--line)"/>
+
+  <text x="0" y="98" font-size="12.5" font-weight="600" fill="var(--stop)">pass the hash</text>
+  <rect x="0" y="110" width="140" height="42" rx="5" fill="var(--warn-bg)" stroke="var(--warn-line)"/>
+  <text x="70" y="127" font-size="10.5" fill="var(--stop)" text-anchor="middle">侵入済み端末の</text>
+  <text x="70" y="143" font-size="10.5" fill="var(--stop)" text-anchor="middle">メモリからハッシュ窃取</text>
+  <line x1="146" y1="131" x2="358" y2="131" stroke="var(--stop)" stroke-width="1.5" marker-end="url(#mk7-stop)"/>
+  <text x="252" y="125" font-size="10.5" fill="var(--muted)" text-anchor="middle">パスワードは知らないまま</text>
+  <rect x="364" y="110" width="336" height="42" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="532" y="136" font-size="10.5" fill="var(--ink)" text-anchor="middle">同じハッシュで別のサーバにも認証成功（横展開）</text>
+</svg>
+<figcaption>怖いのは横展開のしやすさで、全端末のローカル管理者パスワードが同じだと、1台の侵害がそのまま全台の侵害になる。対策は端末ごとにパスワードを変える、認証情報をメモリから隔離する（Credential Guard）、管理者アカウントを用途別に分けて重要な認証情報を末端の端末に持ち込まない、といった運用側の話になる。</figcaption>
+</figure>
+
+<h3>IP スプーフィング</h3>
+<p>送信元 IP アドレスを詐称してパケットを送る手口。IP アドレスは自己申告で、途中の経路は基本的に検証しない。用途は主に2つ。</p>
+<ul>
+<li><strong>送信元 IP を根拠にしたアクセス制御の回避</strong>：「社内 IP なら許可」のような判定を騙す。</li>
+<li><strong>反射・増幅型 DDoS</strong>：送信元を攻撃対象の IP に偽って DNS や NTP に小さな問い合わせを投げると、大きな応答が攻撃対象に集中する。攻撃者は自分の帯域以上の量を送りつけられる。</li>
+</ul>
+<p>ただし TCP では詐称した IP に応答が返ってしまうためハンドシェイクを完走できず、そのまま通信を乗っ取るのは難しい。使われるのは UDP や、応答を必要としない攻撃が中心になる。対策はネットワーク側で行うもので、<strong>自分の管理下から出ていくパケットの送信元 IP を検査して、身に覚えのないものを落とす</strong>（BCP38 / 出口フィルタリング）。</p>
+
+<div class="note">
+<p><strong>ビジネス側への説明に置き換えると。</strong>ここまでの手法はどれも「侵入の前段」か「侵入後の横展開」で、単体の対策では止まらない。<em>「入口を1枚厚くする」より「1台やられた後に全社に広がらない構造にする」ほうが投資対効果が高い</em>——pass the hash とローカル管理者パスワードの使い回しは、その説明にそのまま使える題材。</p>
+</div>
+
+<h2>参考</h2>
+<ul>
+<li><a href="https://cwe.mitre.org/">CWE - Common Weakness Enumeration</a> ／ <a href="https://cwe.mitre.org/top25/">CWE Top 25 Most Dangerous Software Weaknesses</a></li>
+<li><a href="https://nmap.org/book/man-port-scanning-techniques.html">Nmap — Port Scanning Techniques</a></li>
+<li><a href="https://www.cipherdyne.org/fwknop/">fwknop: Single Packet Authorization &gt; Port Knocking</a> ／ <a href="https://www.cipherdyne.org/fwknop/docs/SPA.html">Single Packet Authorization with fwknop</a></li>
+<li><a href="https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html">GCC — Instrumentation Options（-fstack-protector）</a></li>
+<li><a href="https://www.gnu.org/software/libc/manual/html_node/Source-Fortification.html">The GNU C Library — Source Fortification（_FORTIFY_SOURCE）</a></li>
+<li><a href="https://learn.microsoft.com/en-us/windows/win32/memory/data-execution-prevention">Microsoft Learn — Data Execution Prevention</a></li>
+<li><a href="https://www.ipa.go.jp/security/vuln/websecurity/session-management.html">IPA 安全なウェブサイトの作り方 — 1.4 セッション管理の不備</a></li>
+<li><a href="https://learn.microsoft.com/ja-jp/windows/security/identity-protection/credential-guard/how-it-works">Microsoft Learn — Credential Guard のしくみ</a></li>
+<li><a href="https://www.wi-fi.org/discover-wi-fi/security">Wi-Fi Alliance — Security</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc2827">RFC 2827 (BCP 38) — Network Ingress Filtering</a></li>
+</ul>
+
+</main>
+</body>
+</html>
