@@ -51,30 +51,10 @@ a{color:var(--c1)}
 <p>クライアントは制御コネクションで <code>PASV</code> と送る。サーバは待ち受けを用意して、その<strong>アドレスとポート番号を応答で返す</strong>。クライアントはそこへデータコネクションを張る。パッシブモードの実体はこのやりとりだけ。</p>
 
 <figure>
-<svg viewBox="0 0 700 218" role="img" aria-label="PASVコマンドのやりとり">
-  <defs>
-    <marker id="pv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c1)"/></marker>
-    <marker id="pv2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c2)"/></marker>
-  </defs>
-  <rect x="0" y="0" width="150" height="30" rx="6" fill="var(--lane)" stroke="var(--line)"/>
-  <text x="75" y="20" font-size="11" fill="var(--ink)" text-anchor="middle">クライアント</text>
-  <rect x="550" y="0" width="150" height="30" rx="6" fill="var(--lane)" stroke="var(--line)"/>
-  <text x="625" y="20" font-size="11" fill="var(--ink)" text-anchor="middle">サーバ</text>
-  <line x1="75" y1="34" x2="75" y2="210" stroke="var(--line)" stroke-width="1.5"/>
-  <line x1="625" y1="34" x2="625" y2="210" stroke="var(--line)" stroke-width="1.5"/>
-
-  <line x1="79" y1="62" x2="617" y2="62" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#pv)"/>
-  <text x="350" y="54" font-size="11" fill="var(--c1)" text-anchor="middle">PASV</text>
-
-  <line x1="621" y1="106" x2="83" y2="106" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#pv)"/>
-  <text x="350" y="98" font-size="11" fill="var(--c1)" text-anchor="middle">227 Entering Passive Mode (203,0,113,7,204,173)</text>
-  <text x="350" y="124" font-size="10.5" fill="var(--muted)" text-anchor="middle">前の 4 つが IP アドレス、後ろの 2 つがポート番号（204 × 256 + 173 = 52397）</text>
-
-  <line x1="79" y1="168" x2="617" y2="168" stroke="var(--c2)" stroke-width="1.8" marker-end="url(#pv2)"/>
-  <text x="350" y="160" font-size="11" fill="var(--c2)" text-anchor="middle">203.0.113.7:52397 へデータコネクションを張る</text>
-  <text x="350" y="192" font-size="10.5" fill="var(--muted)" text-anchor="middle">以降、ファイルの中身はこちらを流れる</text>
+<svg viewBox="0 0 700 236" role="img" aria-label="PASVコマンドでサーバが待ち受けポートを教える流れ">
+<defs><marker id="v1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c1)"/></marker><marker id="v2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c2)"/></marker></defs><g transform="translate(0,30)"><rect x="7" y="0" width="42" height="26" rx="2.5" fill="var(--card)" stroke="var(--ink)" stroke-width="1.6"/><rect x="10.5" y="3.5" width="35" height="19" rx="1" fill="var(--ink)" opacity=".13"/><path d="M0 33 L56 33 L48.5 26 L7.5 26 Z" fill="var(--ink)" opacity=".22" stroke="var(--ink)" stroke-width="1.4" stroke-linejoin="round"/></g><text x="0" y="80" font-size="10.5" fill="var(--muted)" text-anchor="start">クライアント</text><g transform="translate(660,24)"><rect x="0" y="0" width="34" height="46" rx="3" fill="var(--card)" stroke="var(--ink)" stroke-width="1.6"/><line x1="0" y1="15.3" x2="34" y2="15.3" stroke="var(--ink)" stroke-width="1.2"/><line x1="0" y1="30.6" x2="34" y2="30.6" stroke="var(--ink)" stroke-width="1.2"/><circle cx="7" cy="7.6" r="2" fill="var(--ink)"/><circle cx="7" cy="23" r="2" fill="var(--ink)"/><circle cx="7" cy="38.3" r="2" fill="var(--ink)"/><line x1="14" y1="7.6" x2="27" y2="7.6" stroke="var(--ink)" stroke-width="1.2" opacity=".5"/><line x1="14" y1="23" x2="27" y2="23" stroke="var(--ink)" stroke-width="1.2" opacity=".5"/><line x1="14" y1="38.3" x2="27" y2="38.3" stroke="var(--ink)" stroke-width="1.2" opacity=".5"/></g><text x="660" y="94" font-size="10.5" fill="var(--muted)" text-anchor="end">サーバ</text><line x1="72" y1="36" x2="648" y2="36" stroke="var(--c1)" stroke-width="1.6" marker-end="url(#v1)"/><text x="360" y="28" font-size="11" fill="var(--c1)" text-anchor="middle">PASV</text><line x1="648" y1="74" x2="72" y2="74" stroke="var(--c1)" stroke-width="1.6" marker-end="url(#v1)"/><text x="360" y="66" font-size="11" fill="var(--c1)" text-anchor="middle">227 Entering Passive Mode (203,0,113,7,204,173)</text><text x="360" y="90" font-size="10" fill="var(--muted)" text-anchor="middle">後ろの 2 つがポート番号　204 × 256 + 173 ＝ 52397</text><rect x="560" y="120" width="140" height="60" rx="8" fill="var(--lane)" stroke="var(--c2)" stroke-width="1.4"/><text x="630" y="142" font-size="10.5" fill="var(--c2)" text-anchor="middle">サーバ側に</text><text x="630" y="160" font-size="10.5" fill="var(--c2)" text-anchor="middle">52397 番の入口が開く</text><g transform="translate(30,128) scale(0.9)"><path d="M0 0 H14 L22 8 V28 H0 Z" fill="var(--card)" stroke="var(--c2)" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 0 V8 H22" fill="none" stroke="var(--c2)" stroke-width="1.4"/><line x1="5" y1="12" x2="17" y2="12" stroke="var(--c2)" stroke-width="1.3" opacity=".6"/><line x1="5" y1="17" x2="17" y2="17" stroke="var(--c2)" stroke-width="1.3" opacity=".6"/><line x1="5" y1="22" x2="17" y2="22" stroke="var(--c2)" stroke-width="1.3" opacity=".6"/></g><line x1="76" y1="150" x2="548" y2="150" stroke="var(--c2)" stroke-width="1.6" marker-end="url(#v2)"/><text x="300" y="142" font-size="10.5" fill="var(--c2)" text-anchor="middle">そこへデータコネクションを張る</text><text x="300" y="200" font-size="10.5" fill="var(--muted)" text-anchor="middle">以降、ファイルの中身はこの経路を流れる</text>
 </svg>
-<figcaption>ポート番号が 2 つの数字に割れているのは、1 バイトずつで表しているから。上位 × 256 + 下位 で戻す。</figcaption>
+<figcaption>ポート番号が 2 つの数字に割れているのは 1 バイトずつで書いているから。上位 × 256 ＋ 下位 で戻す。</figcaption>
 </figure>
 
 <h2>IPv6 では EPSV</h2>

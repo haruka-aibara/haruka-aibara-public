@@ -52,30 +52,10 @@ a{color:var(--c1)}
 <p>そこで、認証のメッセージ（EAP）を IP や TCP に載せず、<strong>LAN のフレームに直接載せて運ぶ</strong>のが EAPOL（EAP over LAN）。端末と入口の機器（AP／スイッチ）の間だけで使う形式で、そこから先の認証サーバへは RADIUS に載せ替えて中継される。</p>
 
 <figure>
-<svg viewBox="0 0 700 200" role="img" aria-label="EAPOLとRADIUSの区間の違い">
-  <rect x="0" y="40" width="160" height="52" rx="8" fill="var(--lane)" stroke="var(--line)"/>
-  <text x="80" y="72" font-size="11" fill="var(--ink)" text-anchor="middle">端末</text>
-  <rect x="270" y="40" width="160" height="52" rx="8" fill="var(--lane)" stroke="var(--line)"/>
-  <text x="350" y="66" font-size="11" fill="var(--ink)" text-anchor="middle">AP／スイッチ</text>
-  <text x="350" y="83" font-size="10" fill="var(--muted)" text-anchor="middle">載せ替えて中継</text>
-  <rect x="540" y="40" width="160" height="52" rx="8" fill="var(--card)" stroke="var(--c3)"/>
-  <text x="620" y="72" font-size="11" fill="var(--c3)" text-anchor="middle">認証サーバ</text>
-
-  <rect x="164" y="52" width="102" height="28" rx="5" fill="var(--card)" stroke="var(--c1)"/>
-  <text x="215" y="71" font-size="10.5" font-weight="600" fill="var(--c1)" text-anchor="middle">EAPOL</text>
-  <rect x="434" y="52" width="102" height="28" rx="5" fill="var(--card)" stroke="var(--c2)"/>
-  <text x="485" y="71" font-size="10.5" font-weight="600" fill="var(--c2)" text-anchor="middle">RADIUS</text>
-
-  <text x="215" y="110" font-size="10.5" fill="var(--c1)" text-anchor="middle">IP を使わず</text>
-  <text x="215" y="127" font-size="10.5" fill="var(--c1)" text-anchor="middle">LAN フレームに直接載せる</text>
-  <text x="485" y="110" font-size="10.5" fill="var(--c2)" text-anchor="middle">こちらは通常の</text>
-  <text x="485" y="127" font-size="10.5" fill="var(--c2)" text-anchor="middle">IP ネットワーク上を通る</text>
-
-  <rect x="0" y="152" width="700" height="42" rx="7" fill="var(--lane)" stroke="var(--line)"/>
-  <text x="350" y="172" font-size="10.5" fill="var(--muted)" text-anchor="middle">EAPOL-Start（端末が認証を始めたい）／ EAPOL-Logoff（切断）／ EAPOL-Key（暗号鍵の受け渡し）などがある</text>
-  <text x="350" y="188" font-size="10.5" fill="var(--muted)" text-anchor="middle">無線の 4 ウェイハンドシェイクで鍵をやりとりしているのも EAPOL-Key</text>
+<svg viewBox="0 0 700 210" role="img" aria-label="同じEAPの中身がEAPOLとRADIUSに載せ替えられて運ばれる">
+<defs><marker id="o1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c1)"/></marker><marker id="o2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c2)"/></marker></defs><g transform="translate(0,76)"><rect x="7" y="0" width="42" height="26" rx="2.5" fill="var(--card)" stroke="var(--ink)" stroke-width="1.6"/><rect x="10.5" y="3.5" width="35" height="19" rx="1" fill="var(--ink)" opacity=".13"/><path d="M0 33 L56 33 L48.5 26 L7.5 26 Z" fill="var(--ink)" opacity=".22" stroke="var(--ink)" stroke-width="1.4" stroke-linejoin="round"/></g><text x="28" y="126" font-size="10.5" fill="var(--muted)" text-anchor="middle">端末</text><rect x="76" y="68" width="180" height="48" rx="24.0" fill="var(--c1)" opacity=".08"/><rect x="76" y="68" width="180" height="48" rx="24.0" fill="none" stroke="var(--c1)" stroke-width="1.6" stroke-dasharray="none"/><text x="166" y="60" font-size="10.5" fill="var(--c1)" text-anchor="middle">EAPOL</text><g transform="translate(150,80) scale(1.0)"><rect x="0" y="0" width="32" height="22" rx="2" fill="var(--card)" stroke="var(--c1)" stroke-width="1.6"/><path d="M0 0 L16 13 L32 0" fill="none" stroke="var(--c1)" stroke-width="1.5"/></g><line x1="96" y1="106" x2="236" y2="106" stroke="var(--c1)" stroke-width="1.3" marker-end="url(#o1)"/><text x="166" y="140" font-size="10" fill="var(--muted)" text-anchor="middle">IP はまだ使えない段階</text><text x="166" y="156" font-size="10" fill="var(--muted)" text-anchor="middle">LAN フレームに直接載せる</text><g transform="translate(286,80)"><line x1="12" y1="0" x2="7" y2="-19" stroke="var(--ink)" stroke-width="1.7" stroke-linecap="round"/><line x1="32" y1="0" x2="37" y2="-19" stroke="var(--ink)" stroke-width="1.7" stroke-linecap="round"/><circle cx="7" cy="-21" r="2.2" fill="var(--ink)"/><circle cx="37" cy="-21" r="2.2" fill="var(--ink)"/><rect x="0" y="0" width="44" height="16" rx="4" fill="var(--card)" stroke="var(--ink)" stroke-width="1.6"/><circle cx="10" cy="8" r="2" fill="var(--ink)"/><circle cx="19" cy="8" r="2" fill="var(--ink)" opacity=".45"/></g><text x="308" y="112" font-size="10.5" fill="var(--muted)" text-anchor="middle">AP／スイッチ</text><rect x="370" y="68" width="190" height="48" rx="24.0" fill="var(--c2)" opacity=".08"/><rect x="370" y="68" width="190" height="48" rx="24.0" fill="none" stroke="var(--c2)" stroke-width="1.6" stroke-dasharray="none"/><text x="465" y="60" font-size="10.5" fill="var(--c2)" text-anchor="middle">RADIUS</text><g transform="translate(449,80) scale(1.0)"><rect x="0" y="0" width="32" height="22" rx="2" fill="var(--card)" stroke="var(--c2)" stroke-width="1.6"/><path d="M0 0 L16 13 L32 0" fill="none" stroke="var(--c2)" stroke-width="1.5"/></g><line x1="390" y1="106" x2="540" y2="106" stroke="var(--c2)" stroke-width="1.3" marker-end="url(#o1)"/><text x="465" y="140" font-size="10" fill="var(--muted)" text-anchor="middle">通常の IP ネットワーク上を通る</text><g transform="translate(600,66)"><rect x="0" y="0" width="34" height="46" rx="3" fill="var(--card)" stroke="var(--ink)" stroke-width="1.6"/><line x1="0" y1="15.3" x2="34" y2="15.3" stroke="var(--ink)" stroke-width="1.2"/><line x1="0" y1="30.6" x2="34" y2="30.6" stroke="var(--ink)" stroke-width="1.2"/><circle cx="7" cy="7.6" r="2" fill="var(--ink)"/><circle cx="7" cy="23" r="2" fill="var(--ink)"/><circle cx="7" cy="38.3" r="2" fill="var(--ink)"/><line x1="14" y1="7.6" x2="27" y2="7.6" stroke="var(--ink)" stroke-width="1.2" opacity=".5"/><line x1="14" y1="23" x2="27" y2="23" stroke="var(--ink)" stroke-width="1.2" opacity=".5"/><line x1="14" y1="38.3" x2="27" y2="38.3" stroke="var(--ink)" stroke-width="1.2" opacity=".5"/></g><text x="617" y="136" font-size="10.5" fill="var(--muted)" text-anchor="middle">認証サーバ</text><text x="350" y="194" font-size="10.5" fill="var(--muted)" text-anchor="middle">運んでいる中身（EAP）は同じ。運び方だけが区間で変わる</text>
 </svg>
-<figcaption>運ぶ中身（EAP）と運び方（EAPOL）は別。認証方式を差し替えても EAPOL の部分は変わらない。</figcaption>
+<figcaption>EAPOL-Start（認証を始めたい）／ EAPOL-Logoff（切断）／ EAPOL-Key（暗号鍵の受け渡し）などがある。無線の 4 ウェイハンドシェイクで鍵を配っているのも EAPOL-Key。</figcaption>
 </figure>
 
 <h2>参考</h2>

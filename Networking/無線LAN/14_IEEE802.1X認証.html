@@ -52,38 +52,10 @@ a{color:var(--c1)}
 <p>登場人物は 3 つ。端末（サプリカント）、その入口となる AP やスイッチ（オーセンティケータ）、正否を判断する認証サーバ（RADIUS）。<strong>入口の機器は判断せず、取り次ぐだけ</strong>なのがポイント。</p>
 
 <figure>
-<svg viewBox="0 0 700 214" role="img" aria-label="802.1Xの3者の役割とゲートの開閉">
-  <defs>
-    <marker id="x1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c1)"/></marker>
-  </defs>
-  <rect x="0" y="30" width="170" height="60" rx="8" fill="var(--lane)" stroke="var(--line)"/>
-  <text x="85" y="54" font-size="11" font-weight="600" fill="var(--ink)" text-anchor="middle">サプリカント</text>
-  <text x="85" y="74" font-size="10.5" fill="var(--muted)" text-anchor="middle">つなごうとする端末</text>
-
-  <rect x="265" y="30" width="170" height="60" rx="8" fill="var(--lane)" stroke="var(--line)"/>
-  <text x="350" y="54" font-size="11" font-weight="600" fill="var(--ink)" text-anchor="middle">オーセンティケータ</text>
-  <text x="350" y="74" font-size="10.5" fill="var(--muted)" text-anchor="middle">AP／スイッチ（取り次ぐ）</text>
-
-  <rect x="530" y="30" width="170" height="60" rx="8" fill="var(--card)" stroke="var(--c3)"/>
-  <text x="615" y="54" font-size="11" font-weight="600" fill="var(--c3)" text-anchor="middle">認証サーバ</text>
-  <text x="615" y="74" font-size="10.5" fill="var(--muted)" text-anchor="middle">RADIUS（可否を判断）</text>
-
-  <line x1="174" y1="60" x2="257" y2="60" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#x1)"/>
-  <text x="215" y="52" font-size="10" fill="var(--c1)" text-anchor="middle">EAPOL</text>
-  <line x1="439" y1="60" x2="522" y2="60" stroke="var(--c1)" stroke-width="1.5" marker-end="url(#x1)"/>
-  <text x="480" y="52" font-size="10" fill="var(--c1)" text-anchor="middle">RADIUS</text>
-
-  <rect x="0" y="116" width="340" height="82" rx="8" fill="var(--warn-bg)" stroke="var(--warn-line)"/>
-  <text x="170" y="140" font-size="11" font-weight="600" fill="var(--stop)" text-anchor="middle">認証が通るまで</text>
-  <text x="170" y="162" font-size="10.5" fill="var(--stop)" text-anchor="middle">通れるのは認証のやりとりだけ</text>
-  <text x="170" y="182" font-size="10.5" fill="var(--stop)" text-anchor="middle">社内にも外にも出られない</text>
-
-  <rect x="360" y="116" width="340" height="82" rx="8" fill="var(--card)" stroke="var(--c3)"/>
-  <text x="530" y="140" font-size="11" font-weight="600" fill="var(--c3)" text-anchor="middle">認証が通ったあと</text>
-  <text x="530" y="162" font-size="10.5" fill="var(--c3)" text-anchor="middle">通常の通信ができるようになる</text>
-  <text x="530" y="182" font-size="10.5" fill="var(--muted)" text-anchor="middle">所属 VLAN をここで割り当てることも多い</text>
+<svg viewBox="0 0 700 232" role="img" aria-label="認証が通るまでゲートが閉じている様子">
+<defs><marker id="z1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c1)"/></marker><marker id="z2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c3)"/></marker><marker id="z3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--stop)"/></marker></defs><g transform="translate(0,78)"><rect x="7" y="0" width="42" height="26" rx="2.5" fill="var(--card)" stroke="var(--ink)" stroke-width="1.6"/><rect x="10.5" y="3.5" width="35" height="19" rx="1" fill="var(--ink)" opacity=".13"/><path d="M0 33 L56 33 L48.5 26 L7.5 26 Z" fill="var(--ink)" opacity=".22" stroke="var(--ink)" stroke-width="1.4" stroke-linejoin="round"/></g><text x="0" y="128" font-size="10.5" fill="var(--muted)" text-anchor="start">サプリカント</text><text x="0" y="144" font-size="10" fill="var(--muted)" text-anchor="start">つなごうとする端末</text><rect x="168" y="46" width="10" height="80" rx="2" fill="var(--muted)"/><rect x="154" y="126" width="38" height="8" rx="2" fill="var(--muted)"/><rect x="178" y="84" width="150" height="10" rx="4" fill="var(--stop)"/><g transform="rotate(-62 180 89)"><rect x="178" y="84" width="150" height="10" rx="4" fill="none" stroke="var(--c3)" stroke-width="1.6" stroke-dasharray="5 4"/></g><path d="M232 76 A46 46 0 0 0 214 40" fill="none" stroke="var(--c3)" stroke-width="1.5" marker-end="url(#z2)"/><text x="268" y="44" font-size="10.5" fill="var(--c3)" text-anchor="start">認証 OK なら開く</text><line x1="66" y1="89" x2="162" y2="89" stroke="var(--c1)" stroke-width="1.6" marker-end="url(#z1)"/><g transform="translate(380,82)"><line x1="12" y1="0" x2="7" y2="-19" stroke="var(--ink)" stroke-width="1.7" stroke-linecap="round"/><line x1="32" y1="0" x2="37" y2="-19" stroke="var(--ink)" stroke-width="1.7" stroke-linecap="round"/><circle cx="7" cy="-21" r="2.2" fill="var(--ink)"/><circle cx="37" cy="-21" r="2.2" fill="var(--ink)"/><rect x="0" y="0" width="44" height="16" rx="4" fill="var(--card)" stroke="var(--ink)" stroke-width="1.6"/><circle cx="10" cy="8" r="2" fill="var(--ink)"/><circle cx="19" cy="8" r="2" fill="var(--ink)" opacity=".45"/></g><text x="402" y="114" font-size="10.5" fill="var(--muted)" text-anchor="middle">オーセンティケータ</text><text x="402" y="130" font-size="10" fill="var(--muted)" text-anchor="middle">AP／スイッチ（取り次ぐだけ）</text><line x1="432" y1="76" x2="528" y2="60" stroke="var(--c1)" stroke-width="1.6" marker-end="url(#z1)"/><text x="480" y="56" font-size="10" fill="var(--c1)" text-anchor="middle">RADIUS</text><g transform="translate(540,34)"><rect x="0" y="0" width="34" height="46" rx="3" fill="var(--card)" stroke="var(--c3)" stroke-width="1.6"/><line x1="0" y1="15.3" x2="34" y2="15.3" stroke="var(--c3)" stroke-width="1.2"/><line x1="0" y1="30.6" x2="34" y2="30.6" stroke="var(--c3)" stroke-width="1.2"/><circle cx="7" cy="7.6" r="2" fill="var(--c3)"/><circle cx="7" cy="23" r="2" fill="var(--c3)"/><circle cx="7" cy="38.3" r="2" fill="var(--c3)"/><line x1="14" y1="7.6" x2="27" y2="7.6" stroke="var(--c3)" stroke-width="1.2" opacity=".5"/><line x1="14" y1="23" x2="27" y2="23" stroke="var(--c3)" stroke-width="1.2" opacity=".5"/><line x1="14" y1="38.3" x2="27" y2="38.3" stroke="var(--c3)" stroke-width="1.2" opacity=".5"/></g><text x="557" y="104" font-size="10.5" fill="var(--c3)" text-anchor="middle">認証サーバ</text><text x="268" y="172" font-size="10.5" fill="var(--stop)" text-anchor="middle">認証が通るまで、通れるのは認証のやりとりだけ</text><text x="268" y="190" font-size="10.5" fill="var(--stop)" text-anchor="middle">社内にも外にも出られない</text><text x="268" y="216" font-size="10.5" fill="var(--muted)" text-anchor="middle">通ったあとは通常の通信ができる（所属 VLAN をここで割り当てることも多い）</text>
 </svg>
-<figcaption>無線での「WPA2/WPA3 エンタープライズ」の中身がこれ。認証サーバを 1 か所にまとめられるので、社員 1 人の停止をそこだけで反映できる。</figcaption>
+<figcaption>無線の「WPA2／WPA3 エンタープライズ」の中身がこれ。判断を認証サーバ 1 か所にまとめられるので、社員 1 人の停止をそこだけで反映できる。</figcaption>
 </figure>
 
 <h2>参考</h2>

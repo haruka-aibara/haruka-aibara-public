@@ -52,40 +52,10 @@ a{color:var(--c1)}
 <p>WPA3 のパーソナルモードは <strong>SAE</strong> という鍵交換に変えて、ここを塞いだ。<strong>やりとりを録音しても、そこから合言葉を試すことができない</strong>形になっている。</p>
 
 <figure>
-<svg viewBox="0 0 700 218" role="img" aria-label="WPA2とWPA3でのオフライン総当たりの成否">
-  <defs>
-    <marker id="w3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--stop)"/></marker>
-    <marker id="w4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c3)"/></marker>
-  </defs>
-  <text x="0" y="14" font-size="11.5" font-weight="600" fill="var(--stop)">WPA2 パーソナル</text>
-  <rect x="0" y="24" width="180" height="46" rx="7" fill="var(--lane)" stroke="var(--line)"/>
-  <text x="90" y="43" font-size="10.5" fill="var(--ink)" text-anchor="middle">接続時のやりとりを</text>
-  <text x="90" y="60" font-size="10.5" fill="var(--ink)" text-anchor="middle">電波から拾う</text>
-  <line x1="186" y1="47" x2="264" y2="47" stroke="var(--stop)" stroke-width="1.5" marker-end="url(#w3)"/>
-  <rect x="270" y="24" width="200" height="46" rx="7" fill="var(--warn-bg)" stroke="var(--warn-line)"/>
-  <text x="370" y="43" font-size="10.5" fill="var(--stop)" text-anchor="middle">手元のマシンで</text>
-  <text x="370" y="60" font-size="10.5" fill="var(--stop)" text-anchor="middle">合言葉を片っ端から試す</text>
-  <line x1="476" y1="47" x2="554" y2="47" stroke="var(--stop)" stroke-width="1.5" marker-end="url(#w3)"/>
-  <rect x="560" y="24" width="140" height="46" rx="7" fill="var(--warn-bg)" stroke="var(--warn-line)"/>
-  <text x="630" y="52" font-size="11" font-weight="600" fill="var(--stop)" text-anchor="middle">短ければ当たる</text>
-
-  <line x1="0" y1="96" x2="700" y2="96" stroke="var(--line)"/>
-
-  <text x="0" y="122" font-size="11.5" font-weight="600" fill="var(--c3)">WPA3 パーソナル（SAE）</text>
-  <rect x="0" y="132" width="180" height="46" rx="7" fill="var(--lane)" stroke="var(--line)"/>
-  <text x="90" y="160" font-size="10.5" fill="var(--ink)" text-anchor="middle">同じように拾う</text>
-  <line x1="186" y1="155" x2="264" y2="155" stroke="var(--c3)" stroke-width="1.5" marker-end="url(#w4)"/>
-  <rect x="270" y="132" width="200" height="46" rx="7" fill="var(--card)" stroke="var(--c3)"/>
-  <text x="370" y="151" font-size="10.5" fill="var(--c3)" text-anchor="middle">拾った内容からは</text>
-  <text x="370" y="168" font-size="10.5" fill="var(--c3)" text-anchor="middle">合言葉を試せない</text>
-  <line x1="476" y1="155" x2="554" y2="155" stroke="var(--c3)" stroke-width="1.5" marker-end="url(#w4)"/>
-  <rect x="560" y="132" width="140" height="46" rx="7" fill="var(--card)" stroke="var(--c3)"/>
-  <text x="630" y="152" font-size="11" font-weight="600" fill="var(--c3)" text-anchor="middle">AP に毎回</text>
-  <text x="630" y="169" font-size="11" font-weight="600" fill="var(--c3)" text-anchor="middle">挑むしかない</text>
-
-  <text x="350" y="204" font-size="10.5" fill="var(--muted)" text-anchor="middle">さらに、合言葉が後で漏れても過去に録音された通信は復号できない（前方秘匿）</text>
+<svg viewBox="0 0 700 250" role="img" aria-label="WPA2は録音した通信からオフラインで総当たりできるがWPA3はできない">
+<defs><marker id="g1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--stop)"/></marker><marker id="g2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--c3)"/></marker></defs><text x="0" y="13" font-size="11.5" fill="var(--stop)" text-anchor="start" font-weight="600">WPA2 パーソナル</text><path d="M15.9 44.1 A14 14 0 0 1 15.9 63.9" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round" opacity="0.50"/><path d="M21.6 38.4 A22 22 0 0 1 21.6 69.6" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round" opacity="0.39"/><rect x="44" y="28" width="150" height="52" rx="8" fill="var(--warn-bg)" stroke="var(--warn-line)" stroke-width="1.4"/><text x="119" y="50" font-size="10.5" fill="var(--stop)" text-anchor="middle">接続時のやりとりを</text><text x="119" y="68" font-size="10.5" fill="var(--stop)" text-anchor="middle">電波から拾う</text><line x1="200" y1="54" x2="244" y2="54" stroke="var(--stop)" stroke-width="1.6" marker-end="url(#g1)"/><rect x="252" y="24" width="190" height="62" rx="8" fill="var(--warn-bg)" stroke="var(--warn-line)" stroke-width="1.4"/><text x="347" y="48" font-size="10.5" fill="var(--stop)" text-anchor="middle">手元のマシンで総当たり</text><text x="347" y="68" font-size="10" fill="var(--muted)" text-anchor="middle">password / 12345678 / …</text><line x1="450" y1="54" x2="494" y2="54" stroke="var(--stop)" stroke-width="1.6" marker-end="url(#g1)"/><g transform="translate(506,34) scale(1.1)"><path d="M16.5 12 V8 a5.5 5.5 0 0 1 11 0" fill="none" stroke="var(--stop)" stroke-width="2.2"/><rect x="1" y="12" width="20" height="16" rx="3" fill="var(--stop)"/><circle cx="11" cy="20" r="2.4" fill="var(--card)"/></g><text x="545" y="50" font-size="10.5" fill="var(--stop)" text-anchor="start">短ければ開く</text><text x="545" y="68" font-size="10" fill="var(--muted)" text-anchor="start">回数制限も効かない</text><line x1="0" y1="106" x2="700" y2="106" stroke="var(--line)" stroke-width="1"/><text x="0" y="132" font-size="11.5" fill="var(--c3)" text-anchor="start" font-weight="600">WPA3 パーソナル（SAE）</text><path d="M15.9 166.1 A14 14 0 0 1 15.9 185.9" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round" opacity="0.50"/><path d="M21.6 160.4 A22 22 0 0 1 21.6 191.6" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round" opacity="0.39"/><rect x="44" y="150" width="150" height="52" rx="8" fill="var(--card)" stroke="var(--c3)" stroke-width="1.4"/><text x="119" y="172" font-size="10.5" fill="var(--ink)" text-anchor="middle">同じように拾える</text><text x="119" y="190" font-size="10" fill="var(--muted)" text-anchor="middle">（そこは防げない）</text><line x1="200" y1="176" x2="244" y2="176" stroke="var(--c3)" stroke-width="1.6" marker-end="url(#g2)"/><rect x="252" y="146" width="190" height="62" rx="8" fill="var(--card)" stroke="var(--c3)" stroke-width="1.4"/><text x="347" y="170" font-size="10.5" fill="var(--c3)" text-anchor="middle">手元のマシンで総当たり</text><text x="347" y="190" font-size="10" fill="var(--muted)" text-anchor="middle">password / 12345678 / …</text><line x1="450" y1="176" x2="494" y2="176" stroke="var(--c3)" stroke-width="1.6" marker-end="url(#g2)"/><circle cx="472" cy="176" r="13" fill="var(--warn-bg)" stroke="var(--c3)" stroke-width="1.6"/><path d="M466.54 170.54 L477.46 181.46 M477.46 170.54 L466.54 181.46" stroke="var(--c3)" stroke-width="2.4" stroke-linecap="round"/><g transform="translate(506,156) scale(1.1)"><path d="M5.5 12 V8 a5.5 5.5 0 0 1 11 0 V12" fill="none" stroke="var(--c3)" stroke-width="2.2"/><rect x="1" y="12" width="20" height="16" rx="3" fill="var(--c3)"/><circle cx="11" cy="20" r="2.4" fill="var(--card)"/></g><text x="545" y="172" font-size="10.5" fill="var(--c3)" text-anchor="start">拾った内容からは試せない</text><text x="545" y="190" font-size="10" fill="var(--muted)" text-anchor="start">AP に毎回挑むしかない</text><text x="350" y="238" font-size="10.5" fill="var(--muted)" text-anchor="middle">合言葉が後から漏れても、過去に録音された通信は復号できない（前方秘匿）</text>
 </svg>
-<figcaption>エンタープライズ向けにはより強い暗号を揃えた 192 ビットモードもある。移行期の機器は WPA2 と WPA3 の両対応で動く設定（移行モード）を持つが、その間は WPA2 側の弱点も残る。</figcaption>
+<figcaption>移行期の機器は WPA2 と WPA3 を同時に受ける設定（移行モード）を持つが、その間は WPA2 側の弱点も残る。エンタープライズ向けにはより強い 192 ビットモードもある。</figcaption>
 </figure>
 
 <h2>参考</h2>
