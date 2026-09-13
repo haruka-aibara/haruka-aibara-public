@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SCS評価制度を図で理解する</title>
+<style>
+:root{
+  --bg:#fbfaf8; --card:#fff; --ink:#23201d; --muted:#6b645c; --line:#e3ded6;
+  --lane:#eeeae4; --warn-bg:#fdf3f1; --warn-line:#e0b4ac;
+  --c1:#3d6b9c; --c2:#b8562f; --c3:#5f8248; --c4:#7a63a0; --stop:#c2453a; --on:#fff;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#17161a; --card:#1e1d22; --ink:#e8e4dd; --muted:#9d968c; --line:#34323a;
+    --lane:#2a2830; --warn-bg:#2a1e1d; --warn-line:#6b3b35;
+    --c1:#5c8cc0; --c2:#cf6c42; --c3:#77a05c; --c4:#9680bd; --stop:#d75b4f; --on:#15141a;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:2.5rem 1.25rem 5rem;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  line-height:1.85;font-size:16px;
+}
+main{max-width:52rem;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.35;margin:0 0 .4rem}
+.lede{color:var(--muted);margin:0 0 2.5rem;font-size:1.02rem}
+h2{font-size:1.25rem;margin:3rem 0 .6rem;padding-top:1.4rem;border-top:1px solid var(--line)}
+p{margin:.7rem 0}
+figure{margin:1.4rem 0;padding:1.1rem 1.1rem .8rem;background:var(--card);border:1px solid var(--line);border-radius:10px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
+.note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:.9rem 1.1rem;margin:1.4rem 0}
+.note strong{color:var(--stop)}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.93rem}
+th,td{border:1px solid var(--line);padding:.5rem .7rem;text-align:left;vertical-align:top}
+th{background:var(--lane);font-weight:600}
+code{background:var(--lane);padding:.1em .4em;border-radius:4px;font-size:.9em}
+ul{padding-left:1.3rem}li{margin:.35rem 0}
+a{color:var(--c1)}
+</style>
+</head>
+<body>
+<main>
+
+<h1>SCS評価制度を図で理解する</h1>
+<p class="lede">取引先ごとにバラバラだった「セキュリティ対策は大丈夫か」への答えを、★の共通指標に置き換える制度。</p>
+
+<h2>何が問題なのか</h2>
+<p>取引先から送られてくるセキュリティチェックシートは、会社ごとに項目も粒度も違う。答える側は似た内容を毎回書き直し、聞く側は返ってきたシートが実態を表しているのか判断できない。委託先経由の侵害が現実に増えているのに、この確認作業はほとんど負担しか生んでいない。</p>
+<p>この「各社バラバラのものさし」を1本にまとめようとしているのが <strong>SCS評価制度</strong>（正式名称: サプライチェーン強化に向けたセキュリティ対策評価制度）。経済産業省と内閣官房国家サイバー統括室が制度構築方針を示し、運営は IPA が担う。申請の受付開始は 2026年度末（2027年1〜3月頃）の予定。</p>
+
+<h2>★は5段階、評価のやり方が段階ごとに違う</h2>
+<p>制度の中心は★1〜★5の5段階。重要なのは段階が上がると要求事項が増えるだけでなく、<strong>「誰がそれを確認するか」が変わる</strong>ことにある。</p>
+
+<figure>
+<svg viewBox="0 0 700 208" role="img" aria-label="SCS評価制度の★1から★5までの段階と評価方法・要求事項数・有効期間の比較">
+  <rect x="100" y="16" width="112" height="38" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+  <rect x="220" y="16" width="112" height="38" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+  <rect x="340" y="16" width="112" height="38" rx="5" fill="var(--c1)"/>
+  <rect x="460" y="16" width="112" height="38" rx="5" fill="var(--c2)"/>
+  <rect x="580" y="16" width="112" height="38" rx="5" fill="none" stroke="var(--muted)" stroke-dasharray="4 3"/>
+  <text x="156" y="41" font-size="15" font-weight="600" fill="var(--ink)" text-anchor="middle">★1</text>
+  <text x="276" y="41" font-size="15" font-weight="600" fill="var(--ink)" text-anchor="middle">★2</text>
+  <text x="396" y="41" font-size="15" font-weight="600" fill="var(--on)" text-anchor="middle">★3</text>
+  <text x="516" y="41" font-size="15" font-weight="600" fill="var(--on)" text-anchor="middle">★4</text>
+  <text x="636" y="41" font-size="15" font-weight="600" fill="var(--muted)" text-anchor="middle">★5</text>
+
+  <text x="0" y="86" font-size="11.5" fill="var(--muted)">誰が確認</text>
+  <text x="156" y="86" font-size="11" fill="var(--ink)" text-anchor="middle">自己宣言</text>
+  <text x="276" y="86" font-size="11" fill="var(--ink)" text-anchor="middle">自己宣言</text>
+  <text x="396" y="80" font-size="11" fill="var(--ink)" text-anchor="middle">自己評価＋</text>
+  <text x="396" y="95" font-size="11" fill="var(--ink)" text-anchor="middle">専門家の確認</text>
+  <text x="516" y="80" font-size="11" fill="var(--ink)" text-anchor="middle">評価機関の</text>
+  <text x="516" y="95" font-size="11" fill="var(--ink)" text-anchor="middle">第三者評価</text>
+  <text x="636" y="86" font-size="11" fill="var(--muted)" text-anchor="middle">具体化はこれから</text>
+
+  <line x1="0" y1="110" x2="700" y2="110" stroke="var(--line)"/>
+  <text x="0" y="132" font-size="11.5" fill="var(--muted)">要求事項</text>
+  <text x="156" y="132" font-size="11" fill="var(--muted)" text-anchor="middle">—</text>
+  <text x="276" y="132" font-size="11" fill="var(--muted)" text-anchor="middle">—</text>
+  <text x="396" y="132" font-size="12" font-weight="600" fill="var(--c1)" text-anchor="middle">26件</text>
+  <text x="516" y="132" font-size="12" font-weight="600" fill="var(--c2)" text-anchor="middle">43件</text>
+
+  <line x1="0" y1="146" x2="700" y2="146" stroke="var(--line)"/>
+  <text x="0" y="168" font-size="11.5" fill="var(--muted)">有効期間</text>
+  <text x="396" y="168" font-size="11" fill="var(--ink)" text-anchor="middle">1年</text>
+  <text x="516" y="168" font-size="11" fill="var(--ink)" text-anchor="middle">3年</text>
+
+  <line x1="340" y1="186" x2="572" y2="186" stroke="var(--c3)" stroke-width="1.5"/>
+  <text x="456" y="204" font-size="11" fill="var(--c3)" text-anchor="middle">★4 はさらに技術検証（脆弱性検査など）と実地審査が加わる</text>
+</svg>
+<figcaption>★2 までは宣言するだけなので、外から見た信用の重みが変わるのは★3から。★3 の有効期間が1年と短いのは、専門家の確認とはいえ土台が自己評価だから。</figcaption>
+</figure>
+
+<p>要求事項の分類は NIST CSF の6機能（ガバナンス／特定／防御／検知／対応／復旧）に<strong>取引先管理</strong>を足した7分類がベース。ISMS が「マネジメントの仕組みが回っているか」を見るのに対し、SCS は対策そのものの実装状況を見る。「ISMS を取っているから SCS も通る」とは限らない。</p>
+
+<h2>誰が評価するのか</h2>
+
+<figure>
+<svg viewBox="0 0 700 230" role="img" aria-label="SCS評価制度の運営体制。経産省・内閣官房の方針のもとIPAが制度を運営し、指定された評価機関等が組織を評価する">
+  <rect x="180" y="0" width="340" height="30" rx="5" fill="var(--lane)" stroke="var(--line)"/>
+  <text x="350" y="20" font-size="11.5" fill="var(--ink)" text-anchor="middle">経済産業省 ／ 内閣官房国家サイバー統括室（制度構築方針）</text>
+  <line x1="350" y1="30" x2="350" y2="46" stroke="var(--muted)"/>
+
+  <rect x="150" y="46" width="400" height="58" rx="6" fill="none" stroke="var(--c1)" stroke-width="1.5"/>
+  <text x="164" y="64" font-size="12" font-weight="600" fill="var(--c1)">IPA（制度運営機関）</text>
+  <rect x="300" y="70" width="112" height="24" rx="4" fill="var(--c1)"/>
+  <text x="356" y="86" font-size="10.5" fill="var(--on)" text-anchor="middle">運営審議委員会</text>
+  <rect x="420" y="70" width="112" height="24" rx="4" fill="var(--c1)"/>
+  <text x="476" y="86" font-size="10.5" fill="var(--on)" text-anchor="middle">指定委員会</text>
+  <text x="164" y="88" font-size="10.5" fill="var(--muted)">規程の制定・運営</text>
+
+  <line x1="350" y1="104" x2="350" y2="124" stroke="var(--c1)" stroke-width="1.5"/>
+  <text x="360" y="119" font-size="10.5" fill="var(--c1)">指定</text>
+
+  <rect x="20" y="124" width="200" height="44" rx="5" fill="var(--card)" stroke="var(--c2)"/>
+  <text x="120" y="142" font-size="11.5" font-weight="600" fill="var(--c2)" text-anchor="middle">評価機関</text>
+  <text x="120" y="159" font-size="10" fill="var(--muted)" text-anchor="middle">★4 の第三者評価を行う</text>
+  <rect x="250" y="124" width="200" height="44" rx="5" fill="var(--card)" stroke="var(--c2)"/>
+  <text x="350" y="142" font-size="11.5" font-weight="600" fill="var(--c2)" text-anchor="middle">技術検証事業者</text>
+  <text x="350" y="159" font-size="10" fill="var(--muted)" text-anchor="middle">脆弱性検査などを担う</text>
+  <rect x="480" y="124" width="200" height="44" rx="5" fill="var(--card)" stroke="var(--c2)"/>
+  <text x="580" y="142" font-size="11.5" font-weight="600" fill="var(--c2)" text-anchor="middle">研修事業者</text>
+  <text x="580" y="159" font-size="10" fill="var(--muted)" text-anchor="middle">★3 を確認する専門家を育てる</text>
+
+  <line x1="120" y1="168" x2="120" y2="192" stroke="var(--muted)" stroke-dasharray="3 3"/>
+  <line x1="350" y1="168" x2="350" y2="192" stroke="var(--muted)" stroke-dasharray="3 3"/>
+  <line x1="580" y1="168" x2="580" y2="192" stroke="var(--muted)" stroke-dasharray="3 3"/>
+  <rect x="180" y="192" width="340" height="34" rx="6" fill="var(--c3)"/>
+  <text x="350" y="214" font-size="12" fill="var(--on)" text-anchor="middle">★の取得を目指す組織</text>
+</svg>
+<figcaption>企業が直接向き合うのは下段の3者。★3 なら研修を受けた専門家、★4 なら評価機関。この3者を誰にするかを決めているのが指定委員会で、制度の信頼性はここに乗っている。</figcaption>
+</figure>
+
+<h2>規程はどこまで出ているのか</h2>
+<p>制度の中身は1つの文書ではなく、基本規程を頂点にした約20文書の体系で決まる。2026年8月に最上位の<strong>基本規程（SCS-100）</strong>と運営・指定まわりの規則が施行され、制度の「器」が先に固まった形になっている。</p>
+
+<figure>
+<svg viewBox="0 0 700 190" role="img" aria-label="SCS評価制度の文書体系。基本規程SCS-100の下に100番台の運営規則と200番台の事業者指定規則がある">
+  <rect x="250" y="0" width="200" height="34" rx="5" fill="var(--c1)"/>
+  <text x="350" y="22" font-size="12" font-weight="600" fill="var(--on)" text-anchor="middle">基本規程（SCS-100）</text>
+  <line x1="350" y1="34" x2="350" y2="46" stroke="var(--muted)"/>
+  <line x1="175" y1="46" x2="525" y2="46" stroke="var(--muted)"/>
+  <line x1="175" y1="46" x2="175" y2="60" stroke="var(--muted)"/>
+  <line x1="525" y1="46" x2="525" y2="60" stroke="var(--muted)"/>
+
+  <rect x="20" y="60" width="310" height="80" rx="6" fill="var(--card)" stroke="var(--line)"/>
+  <text x="36" y="78" font-size="11.5" font-weight="600" fill="var(--ink)">100番台 — 運営する側のルール</text>
+  <text x="36" y="98" font-size="10.5" fill="var(--muted)">SCS-110 制度運営機関規則</text>
+  <text x="36" y="115" font-size="10.5" fill="var(--muted)">SCS-111 運営審議委員会規則</text>
+  <text x="36" y="132" font-size="10.5" fill="var(--muted)">SCS-112 指定委員会規則</text>
+
+  <rect x="370" y="60" width="310" height="80" rx="6" fill="var(--card)" stroke="var(--line)"/>
+  <text x="386" y="78" font-size="11.5" font-weight="600" fill="var(--ink)">200番台 — 指定される事業者のルール</text>
+  <text x="386" y="98" font-size="10.5" fill="var(--muted)">SCS-210 評価機関指定規則</text>
+  <text x="386" y="115" font-size="10.5" fill="var(--muted)">SCS-220 技術検証事業者指定規則</text>
+  <text x="386" y="132" font-size="10.5" fill="var(--muted)">SCS-230 研修事業者指定規則</text>
+
+  <rect x="150" y="154" width="400" height="34" rx="6" fill="none" stroke="var(--c2)" stroke-dasharray="5 4"/>
+  <text x="350" y="176" font-size="11.5" fill="var(--c2)" text-anchor="middle">要求事項・評価基準・評価ガイド類 … 順次公開</text>
+</svg>
+<figcaption>いま施行済みなのは「誰が制度を回し、誰を指定するか」の部分。申請する企業が実際に読むことになる評価ガイドはこれから出る。準備を外注する場合、この未確定部分の差分に追随してもらえるかが契約時の確認点になる。</figcaption>
+</figure>
+
+<div class="note">
+<p><strong>「取得しないと入札から除外される」は誤り。</strong> 制度開始前から、これを名乗った不適切な勧誘が報告され、経済産業省と内閣官房が2026年4月に注意喚起を出している。現時点で確からしいのは「政府調達から段階的に民間へ広がる設計」までで、取引規制や入札除外が決まっている事実はない。</p>
+</div>
+
+<h2>いま手をつけるなら</h2>
+<p>評価ガイドが出ていない段階でできるのは、★3 の26要求事項を自社の現状に当てて棚卸しすることまで。IT資産台帳、委託先管理の記録、インシデント対応手順といった「聞かれたら出す紙」が揃っているかを確認しておくと、ガイド公開後の差分対応で済む。</p>
+<p>社内を動かす言い方としては、「新しい認証を取る」より<strong>「取引先ごとのチェックシート対応にかけている工数を、共通の★1つに置き換える話」</strong>のほうが通りやすい。コストではなく、すでに払っている対応コストの置き換えとして説明できる。</p>
+
+<h2>参考</h2>
+<ul>
+<li><a href="https://www.ipa.go.jp/security/scs/index.html">サプライチェーン強化に向けたセキュリティ対策評価制度（SCS評価制度） | IPA</a></li>
+<li><a href="https://www.ipa.go.jp/security/scs/details.html">SCS評価制度の詳細情報 | IPA</a></li>
+<li><a href="https://www.ipa.go.jp/security/scs/regulation-advisory-committeess.html">制度規程・委員会 | IPA</a></li>
+<li><a href="https://www.meti.go.jp/policy/netsecurity/scs.html">サプライチェーン強化に向けたセキュリティ対策評価制度（SCS評価制度） | 経済産業省</a></li>
+<li><a href="https://www.meti.go.jp/press/2025/03/20260327001/20260327001.html">「サプライチェーン強化に向けたセキュリティ対策評価制度に関する制度構築方針」を公表しました | 経済産業省</a></li>
+<li><a href="https://www.meti.go.jp/policy/netsecurity/20260427_scs.html">SCS評価制度に関する注意喚起 | 経済産業省</a></li>
+</ul>
+
+</main>
+</body>
+</html>
